@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#56112B">
+<title>Pacientes — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: #1a0010; }
+body { font-family: 'Inter', sans-serif; }
+
+:root {
+  --trabajo: #719176; --trabajo-soft: #e0ebe1; --trabajo-dark: #4a6a50;
+  --hogar: #56112B; --hogar-soft: #f0d8e2; --hogar-mid: #8a2a50;
+  --yo: #D65FA9; --yo-soft: #fae0f2; --yo-dark: #a03a7a;
+  --fondo: #faf6f0; --fondo2: #f2ece4; --texto: #2a1018; --texto2: #6a5060; --borde: #ddd0cc;
+}
+
+.app { width: 100%; height: 100%; max-width: 430px; margin: 0 auto; background: var(--fondo); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+/* COVER */
+.cover { background: linear-gradient(160deg, var(--hogar) 0%, #1a0010 100%); padding: 48px 18px 0; position: relative; flex-shrink: 0; }
+.cover-back { position: absolute; top: 48px; left: 14px; background: rgba(255,255,255,0.12); border: none; border-radius: 8px; padding: 6px 10px; color: rgba(255,255,255,0.8); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; }
+.cover-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: #fff; margin-top: 36px; position: relative; z-index: 1; }
+.cover-sub { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: rgba(255,255,255,0.55); margin-top: 2px; margin-bottom: 14px; position: relative; z-index: 1; }
+
+/* BUSQUEDA */
+.search-bar { background: #6b1a3a; padding: 8px 12px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.search-input { flex: 1; background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; font-family: 'Inter', sans-serif; outline: none; }
+.search-input::placeholder { color: rgba(255,255,255,0.45); }
+.search-icon { color: rgba(255,255,255,0.55); font-size: 17px; }
+
+/* FILTROS */
+.filtros-bar { display: flex; gap: 6px; padding: 8px 12px; background: #fff; border-bottom: 0.5px solid var(--borde); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.filtros-bar::-webkit-scrollbar { display: none; }
+.filtro-btn { padding: 5px 12px; border-radius: 12px; font-size: 9px; font-weight: 700; border: 0.5px solid var(--borde); background: var(--fondo); color: var(--texto2); cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif; flex-shrink: 0; transition: all 0.12s; }
+.filtro-btn.active { background: var(--hogar); color: #fff; border-color: var(--hogar); }
+
+/* LISTA PACIENTES */
+.body { flex: 1; overflow-y: auto; padding: 10px 12px 90px; -webkit-overflow-scrolling: touch; }
+
+.pac-card { background: #fff; border: 0.5px solid var(--borde); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: all 0.12s; border-left: 4px solid var(--trabajo); }
+.pac-card:active { background: var(--fondo2); }
+.pac-card.colectivando { border-left-color: var(--yo); }
+.pac-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.pac-info { flex: 1; min-width: 0; }
+.pac-nombre { font-size: 13px; font-weight: 600; color: var(--texto); }
+.pac-det { font-size: 10px; color: var(--texto2); margin-top: 2px; }
+.pac-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.pac-tag { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 5px; }
+.tag-nino { background: #d6f0e8; color: #1a5a3a; }
+.tag-adol { background: #ddeaf5; color: #2a5a98; }
+.tag-adult { background: #f5e0f5; color: #5a2a6a; }
+.tag-os { background: var(--hogar-soft); color: var(--hogar); }
+.tag-part { background: var(--fondo2); color: var(--texto2); }
+.tag-colect { background: var(--yo-soft); color: var(--yo-dark); }
+.pac-arrow { font-size: 18px; color: var(--borde); flex-shrink: 0; }
+
+.sec-label { font-size: 9px; font-weight: 700; color: var(--texto2); letter-spacing: 1.5px; text-transform: uppercase; margin: 12px 0 7px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--texto2); }
+.empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 12px; line-height: 1.5; }
+
+/* FAB */
+.fab { position: fixed; bottom: 20px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: var(--hogar); border: none; color: #fff; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(86,17,43,0.4); z-index: 50; }
+
+/* VISTA DETALLE PACIENTE */
+.vista { display: none; position: fixed; inset: 0; background: var(--fondo); z-index: 100; flex-direction: column; max-width: 430px; margin: 0 auto; }
+.vista.open { display: flex; }
+
+.vista-cover { background: linear-gradient(160deg, var(--hogar) 0%, #1a0010 100%); padding: 48px 16px 16px; flex-shrink: 0; position: relative; }
+.vista-back-btn { position: absolute; top: 48px; left: 14px; background: rgba(255,255,255,0.12); border: none; border-radius: 8px; padding: 6px 10px; color: rgba(255,255,255,0.8); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; }
+.vista-pac-avatar { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; margin: 36px 0 10px; border: 3px solid rgba(255,255,255,0.3); }
+.vista-pac-nombre { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: #fff; }
+.vista-pac-det { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+
+/* INNER TABS */
+.inner-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--borde); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.inner-tabs::-webkit-scrollbar { display: none; }
+.itab { flex-shrink: 0; padding: 9px 14px; font-size: 9px; font-weight: 700; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Inter', sans-serif; white-space: nowrap; transition: all 0.15s; }
+.itab.active { color: var(--hogar); border-bottom-color: var(--hogar); background: var(--hogar-soft); }
+
+.vista-body { flex: 1; overflow-y: auto; padding: 14px; -webkit-overflow-scrolling: touch; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* CAMPOS */
+.campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.campo label { font-size: 9px; font-weight: 700; color: var(--texto2); letter-spacing: 0.8px; text-transform: uppercase; }
+.campo input, .campo select, .campo textarea {
+  background: #fff; border: 0.5px solid var(--borde); border-radius: 8px;
+  padding: 9px 11px; font-size: 12px; color: var(--texto);
+  font-family: 'Inter', sans-serif; width: 100%; outline: none;
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--hogar); background: #fffaf8; }
+.campo textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.campo-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.campo-full { grid-column: 1/-1; }
+
+.seccion-header { display: flex; align-items: center; gap: 8px; margin: 16px 0 10px; }
+.seccion-tag { font-size: 8px; font-weight: 700; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+.tag-verde { background: #d6f0e8; color: #1a5a3a; }
+.tag-lila { background: var(--yo-soft); color: var(--yo-dark); }
+.tag-naranja { background: #fae8cc; color: #7a4010; }
+.tag-azul { background: #ddeaf5; color: #2a5a98; }
+.tag-rosa { background: var(--hogar-soft); color: var(--hogar); }
+.seccion-line { flex: 1; height: 0.5px; background: var(--borde); }
+
+/* TABLA FAMILIA */
+.tabla-familia { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+.tabla-familia th { background: var(--fondo2); color: var(--texto2); font-size: 9px; font-weight: 700; padding: 6px 8px; text-align: left; border: 0.5px solid var(--borde); }
+.tabla-familia td { border: 0.5px solid var(--borde); padding: 0; }
+.tabla-familia td input { border: none; padding: 7px 8px; font-size: 11px; width: 100%; background: #fff; color: var(--texto); font-family: 'Inter', sans-serif; outline: none; }
+.tabla-familia td input:focus { background: #fffaf8; }
+.tabla-familia .row-label { background: var(--fondo2); font-size: 9px; font-weight: 600; color: var(--texto2); padding: 6px 8px; }
+
+/* TECNICAS */
+.tecnica-item { display: flex; align-items: center; gap: 8px; background: #fff; border: 0.5px solid var(--borde); border-radius: 7px; padding: 7px 10px; margin-bottom: 5px; }
+.tecnica-item input[type="checkbox"] { accent-color: var(--hogar); width: 14px; height: 14px; flex-shrink: 0; }
+.tecnica-item input[type="text"] { border: none; padding: 0; font-size: 11px; flex: 1; background: transparent; color: var(--texto); font-family: 'Inter', sans-serif; outline: none; }
+
+/* SESIONES */
+.sesion-card { background: #fff; border: 0.5px solid var(--borde); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.sesion-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sesion-num { font-size: 10px; font-weight: 700; color: var(--hogar); background: var(--hogar-soft); padding: 3px 8px; border-radius: 5px; }
+.sesion-fecha { font-size: 10px; color: var(--texto2); }
+.sesion-texto { font-size: 11px; color: var(--texto); line-height: 1.6; }
+
+/* COBROS PACIENTE */
+.cobro-mes { background: #fff; border: 0.5px solid var(--borde); border-radius: 10px; padding: 11px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.cobro-mes-nombre { font-size: 12px; font-weight: 600; color: var(--texto); flex: 1; }
+.cobro-mes-monto { font-size: 13px; font-weight: 700; color: var(--trabajo-dark); }
+.cobro-estado { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
+.estado-pagado { background: #d6f0e8; color: #1a5a3a; }
+.estado-pendiente { background: #fde8e8; color: #9a2a2a; }
+
+/* BUTTONS */
+.btn-primary { width: 100%; padding: 12px; background: var(--hogar); color: #fff; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.btn-outline { width: 100%; padding: 10px; background: transparent; color: var(--texto2); border: 0.5px solid var(--borde); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 11px; cursor: pointer; margin-top: 6px; }
+.btn-danger { width: 100%; padding: 10px; background: transparent; color: #b85a5a; border: 0.5px solid #f0d0d0; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 11px; cursor: pointer; margin-top: 6px; }
+.add-btn { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--hogar); background: none; border: none; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; padding: 6px 0; }
+
+/* FRANJA SELECTOR */
+.franja-selector { display: flex; gap: 6px; margin-bottom: 14px; }
+.franja-btn { flex: 1; padding: 8px 4px; border-radius: 9px; border: 0.5px solid var(--borde); background: var(--fondo); color: var(--texto2); font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.12s; }
+.franja-btn.active { background: var(--hogar); color: #fff; border-color: var(--hogar); }
+
+/* SWITCH COLECTIVANDO */
+.switch-row { display: flex; align-items: center; gap: 10px; background: var(--yo-soft); border-radius: 9px; padding: 10px 12px; margin-bottom: 10px; }
+.switch-label { flex: 1; font-size: 11px; font-weight: 600; color: var(--yo-dark); }
+.switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: 0.3s; }
+.slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+input:checked + .slider { background: var(--yo); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* NUEVA SESION FORM */
+.nueva-sesion-form { background: var(--hogar-soft); border: 0.5px solid var(--hogar); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: none; }
+.nueva-sesion-form.open { display: block; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--trabajo-dark); color: #fff; padding: 9px 20px; border-radius: 20px; font-size: 12px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- PANTALLA LISTA PACIENTES -->
+  <div id="screen-lista" style="display:flex;flex-direction:column;height:100%">
+
+    <div class="cover">
+      <button class="cover-back" onclick="window.history.back()"><i class="ti ti-arrow-left"></i> Inicio</button>
+      <div class="cover-title">👤 Pacientes</div>
+      <div class="cover-sub" id="cover-sub-count">Cargando...</div>
+    </div>
+
+    <div class="search-bar">
+      <i class="ti ti-search search-icon"></i>
+      <input class="search-input" type="text" placeholder="Buscar paciente..." oninput="filtrarLista(this.value)" id="search-input">
+    </div>
+
+    <div class="filtros-bar">
+      <button class="filtro-btn active" onclick="setFiltro('todos',this)">Todos</button>
+      <button class="filtro-btn" onclick="setFiltro('nino',this)">👶 Niños</button>
+      <button class="filtro-btn" onclick="setFiltro('adolescente',this)">🧒 Adolesc.</button>
+      <button class="filtro-btn" onclick="setFiltro('adulto',this)">🧑 Adultos</button>
+      <button class="filtro-btn" onclick="setFiltro('colectivando',this)">🤝 Colectivando</button>
+      <button class="filtro-btn" onclick="setFiltro('os',this)">🏥 Obra social</button>
+    </div>
+
+    <div class="body" id="lista-body">
+      <div class="empty-state">
+        <div class="emoji">👤</div>
+        <p>Cargando pacientes...</p>
+      </div>
+    </div>
+
+    <button class="fab" onclick="abrirNuevoPaciente()">＋</button>
+  </div>
+
+  <!-- VISTA DETALLE PACIENTE -->
+  <div class="vista" id="vista-paciente">
+    <div class="vista-cover">
+      <button class="vista-back-btn" onclick="cerrarDetalle()"><i class="ti ti-arrow-left"></i> Pacientes</button>
+      <div class="vista-pac-avatar" id="det-avatar">VG</div>
+      <div class="vista-pac-nombre" id="det-nombre">—</div>
+      <div class="vista-pac-det" id="det-det">—</div>
+    </div>
+
+    <div class="inner-tabs">
+      <button class="itab active" onclick="setTab('datos')">Datos</button>
+      <button class="itab" onclick="setTab('familia')">Familia</button>
+      <button class="itab" onclick="setTab('admision')">Admisión</button>
+      <button class="itab" onclick="setTab('sesiones')">Sesiones</button>
+      <button class="itab" onclick="setTab('cobros')">Cobros</button>
+      <button class="itab" onclick="setTab('docs')">Docs</button>
+    </div>
+
+    <div class="vista-body">
+
+      <!-- TAB DATOS -->
+      <div class="tab-panel active" id="tab-datos">
+        <div class="seccion-header"><div class="seccion-tag tag-verde">Datos básicos</div><div class="seccion-line"></div></div>
+        <div class="campo-row">
+          <div class="campo campo-full"><label>Apellido y nombre</label><input type="text" id="d-nombre" placeholder="García, Valentina"></div>
+          <div class="campo"><label>Fecha de nacimiento</label><input type="date" id="d-fnac"></div>
+          <div class="campo"><label>Edad</label><input type="number" id="d-edad" placeholder="8"></div>
+          <div class="campo"><label>DNI</label><input type="text" id="d-dni" placeholder="00.000.000"></div>
+          <div class="campo campo-full"><label>Domicilio</label><input type="text" id="d-domicilio" placeholder="Calle, número, localidad"></div>
+          <div class="campo campo-full"><label>Diagnóstico</label><input type="text" id="d-diagnostico" placeholder="Ej: TEA, TDAH, dificultades de aprendizaje..."></div>
+          <div class="campo"><label>Teléfono contacto</label><input type="tel" id="d-tel" placeholder="011 15-0000-0000"></div>
+          <div class="campo"><label>Correo</label><input type="email" id="d-mail" placeholder="mail@mail.com"></div>
+        </div>
+
+        <div class="seccion-header"><div class="seccion-tag tag-lila">Obra social</div><div class="seccion-line"></div></div>
+        <div class="campo-row">
+          <div class="campo campo-full"><label>Nombre de la obra social</label><input type="text" id="d-os-nombre" placeholder="Particular / IOMA / OSDE..."></div>
+          <div class="campo"><label>CUIT</label><input type="text" id="d-os-cuit" placeholder="00-00000000-0"></div>
+          <div class="campo"><label>Nº de beneficiario</label><input type="text" id="d-os-nro" placeholder="000000000"></div>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-label">🤝 Paciente de Colectivando</div>
+          <label class="switch"><input type="checkbox" id="d-colectivando"><span class="slider"></span></label>
+        </div>
+
+        <div class="seccion-header"><div class="seccion-tag tag-azul">Escolaridad</div><div class="seccion-line"></div></div>
+        <div class="campo-row">
+          <div class="campo campo-full"><label>Institución</label><input type="text" id="d-escuela" placeholder="Nombre de la escuela"></div>
+          <div class="campo"><label>Grado / Curso</label><input type="text" id="d-grado" placeholder="3º grado"></div>
+          <div class="campo"><label>Turno / División</label><input type="text" id="d-turno" placeholder="Tarde / B"></div>
+          <div class="campo"><label>Docente</label><input type="text" id="d-docente" placeholder="Apellido y nombre"></div>
+          <div class="campo"><label>Contacto docente</label><input type="text" id="d-docente-tel" placeholder="Tel o mail"></div>
+        </div>
+
+        <button class="btn-primary" onclick="guardarPaciente()"><i class="ti ti-check"></i> Guardar cambios</button>
+        <button class="btn-danger" onclick="eliminarPaciente()">Eliminar paciente</button>
+      </div>
+
+      <!-- TAB FAMILIA -->
+      <div class="tab-panel" id="tab-familia">
+        <div class="seccion-header"><div class="seccion-tag tag-rosa">Familia</div><div class="seccion-line"></div></div>
+        <table class="tabla-familia">
+          <thead><tr><th style="width:32%"></th><th>Madre</th><th>Padre</th></tr></thead>
+          <tbody>
+            <tr><td class="row-label">Apellido y nombre</td><td><input type="text" id="f-madre-nombre" placeholder="..."></td><td><input type="text" id="f-padre-nombre" placeholder="..."></td></tr>
+            <tr><td class="row-label">Edad</td><td><input type="text" id="f-madre-edad" placeholder="..."></td><td><input type="text" id="f-padre-edad" placeholder="..."></td></tr>
+            <tr><td class="row-label">Ocupación</td><td><input type="text" id="f-madre-ocup" placeholder="..."></td><td><input type="text" id="f-padre-ocup" placeholder="..."></td></tr>
+            <tr><td class="row-label">Escolaridad</td><td><input type="text" id="f-madre-esc" placeholder="..."></td><td><input type="text" id="f-padre-esc" placeholder="..."></td></tr>
+            <tr><td class="row-label">Teléfono</td><td><input type="text" id="f-madre-tel" placeholder="..."></td><td><input type="text" id="f-padre-tel" placeholder="..."></td></tr>
+          </tbody>
+        </table>
+        <button class="btn-primary" onclick="guardarFamilia()"><i class="ti ti-check"></i> Guardar familia</button>
+      </div>
+
+      <!-- TAB ADMISION -->
+      <div class="tab-panel" id="tab-admision">
+        <div class="seccion-header"><div class="seccion-tag tag-naranja">Admisión</div><div class="seccion-line"></div></div>
+        <div class="campo-row">
+          <div class="campo"><label>Primera entrevista</label><input type="date" id="a-primera"></div>
+          <div class="campo"><label>Fecha de ingreso</label><input type="date" id="a-ingreso"></div>
+          <div class="campo campo-full"><label>Motivo de consulta</label><textarea id="a-motivo" placeholder="Describir el motivo de consulta..."></textarea></div>
+          <div class="campo campo-full"><label>Evaluación / Tratamiento indicado</label><textarea id="a-evaluacion" placeholder="Descripción inicial..."></textarea></div>
+          <div class="campo campo-full"><label>Otros profesionales</label><input type="text" id="a-profesionales" placeholder="Neurólogo, fonoaudiólogo, maestra integradora..."></div>
+        </div>
+
+        <div class="seccion-header"><div class="seccion-tag tag-lila">Técnicas administradas</div><div class="seccion-line"></div></div>
+        <div id="tecnicas-lista">
+          <div class="tecnica-item"><input type="checkbox"><input type="text" placeholder="Nombre de la técnica o prueba..."></div>
+          <div class="tecnica-item"><input type="checkbox"><input type="text" placeholder="Nombre de la técnica o prueba..."></div>
+        </div>
+        <button class="add-btn" onclick="agregarTecnica()"><i class="ti ti-plus"></i> Agregar técnica</button>
+
+        <div class="seccion-header" style="margin-top:14px"><div class="seccion-tag tag-verde">Perfil</div><div class="seccion-line"></div></div>
+        <div class="campo"><label>Área cognitiva</label><textarea id="p-cognitiva" placeholder="Fortalezas / debilidades..."></textarea></div>
+        <div class="campo"><label>Área de aprendizaje</label><textarea id="p-aprendizaje" placeholder="Fortalezas / debilidades..."></textarea></div>
+        <div class="campo"><label>Área motora</label><textarea id="p-motora" placeholder="Fortalezas / debilidades..."></textarea></div>
+        <div class="campo"><label>Área socioafectiva</label><textarea id="p-socioafectiva" placeholder="Fortalezas / debilidades..."></textarea></div>
+        <div class="campo"><label>Área conductual</label><textarea id="p-conductual" placeholder="Fortalezas / debilidades..."></textarea></div>
+        <div class="campo"><label>Gustos e intereses</label><textarea id="p-gustos" placeholder="¿Qué le gusta? ¿Qué lo motiva?..."></textarea></div>
+
+        <button class="btn-primary" onclick="guardarAdmision()"><i class="ti ti-check"></i> Guardar admisión y perfil</button>
+      </div>
+
+      <!-- TAB SESIONES -->
+      <div class="tab-panel" id="tab-sesiones">
+        <button class="btn-primary" onclick="toggleNuevaSesion()" style="margin-bottom:12px"><i class="ti ti-plus"></i> Nueva nota de sesión</button>
+
+        <div class="nueva-sesion-form" id="nueva-sesion-form">
+          <div class="campo"><label>Fecha</label><input type="date" id="s-fecha"></div>
+          <div class="campo"><label>Sesión Nº</label><input type="number" id="s-num" placeholder="1"></div>
+          <div class="campo"><label>Objetivos de la sesión</label><input type="text" id="s-objetivos" placeholder="Objetivos trabajados hoy..."></div>
+          <div class="campo"><label>Notas / Observaciones</label><textarea id="s-notas" placeholder="Describir lo trabajado, observaciones, actitud del paciente..."></textarea></div>
+          <div class="campo"><label>Tarea para el hogar</label><input type="text" id="s-tarea" placeholder="Actividad para practicar en casa..."></div>
+          <div class="campo"><label>Finalizado</label>
+            <select id="s-finalizado"><option value="si">Sí</option><option value="no">No (continúa)</option></select>
+          </div>
+          <button class="btn-primary" onclick="guardarSesion()"><i class="ti ti-check"></i> Guardar sesión</button>
+          <button class="btn-outline" onclick="toggleNuevaSesion()">Cancelar</button>
+        </div>
+
+        <div id="sesiones-lista">
+          <div class="empty-state"><div class="emoji">📝</div><p>Sin sesiones registradas aún</p></div>
+        </div>
+      </div>
+
+      <!-- TAB COBROS -->
+      <div class="tab-panel" id="tab-cobros">
+        <div class="seccion-header"><div class="seccion-tag tag-verde">Control anual de cobros</div><div class="seccion-line"></div></div>
+
+        <div class="campo-row" style="margin-bottom:12px">
+          <div class="campo"><label>Valor por sesión (ARS)</label><input type="number" id="c-valor" placeholder="0" onchange="actualizarCobros()"></div>
+          <div class="campo"><label>Horas mensuales</label><input type="number" id="c-hs" placeholder="4" onchange="actualizarCobros()"></div>
+        </div>
+
+        <div id="cobros-tabla"></div>
+
+        <div style="background:var(--yo-soft);border-radius:9px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">🤝</span>
+          <div style="flex:1;font-size:10px;color:var(--yo-dark);font-weight:600">Colectivando (40%) se calcula automáticamente</div>
+        </div>
+
+        <button class="btn-primary" onclick="guardarCobros()"><i class="ti ti-check"></i> Guardar cobros</button>
+      </div>
+
+      <!-- TAB DOCS -->
+      <div class="tab-panel" id="tab-docs">
+        <div class="empty-state">
+          <div class="emoji">📁</div>
+          <p>Documentos e informes del paciente</p>
+          <p style="margin-top:8px;font-size:10px">Próximamente podés subir PDFs e informes directamente desde acá</p>
+        </div>
+        <div class="campo" style="margin-top:16px"><label>Nota rápida</label><textarea placeholder="Agregar nota sobre documentación pendiente..."></textarea></div>
+        <button class="btn-primary"><i class="ti ti-file-plus"></i> Agregar nota</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VISTA NUEVO PACIENTE -->
+  <div class="vista" id="vista-nuevo-paciente">
+    <div class="vista-cover">
+      <button class="vista-back-btn" onclick="cerrarNuevoPaciente()"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div style="margin-top:36px">
+        <div class="vista-pac-nombre">Nueva ficha</div>
+        <div class="vista-pac-det">Completá los datos del paciente</div>
+      </div>
+    </div>
+
+    <div class="vista-body">
+      <div class="campo-row">
+        <div class="campo campo-full"><label>Apellido y nombre *</label><input type="text" id="n-nombre" placeholder="García, Valentina"></div>
+      </div>
+
+      <div class="seccion-header"><div class="seccion-tag tag-verde">Franja etaria</div><div class="seccion-line"></div></div>
+      <div class="franja-selector">
+        <button class="franja-btn active" id="f-nino" onclick="setFranja('nino')">👶 Niño (0–12)</button>
+        <button class="franja-btn" id="f-adolescente" onclick="setFranja('adolescente')">🧒 Adolesc.</button>
+        <button class="franja-btn" id="f-adulto" onclick="setFranja('adulto')">🧑 Adulto</button>
+      </div>
+
+      <div class="campo-row">
+        <div class="campo"><label>Fecha de nacimiento</label><input type="date" id="n-fnac"></div>
+        <div class="campo"><label>DNI</label><input type="text" id="n-dni" placeholder="00.000.000"></div>
+        <div class="campo campo-full"><label>Diagnóstico</label><input type="text" id="n-diagnostico" placeholder="Ej: TEA, TDAH..."></div>
+        <div class="campo"><label>Teléfono</label><input type="tel" id="n-tel" placeholder="011 15-0000-0000"></div>
+        <div class="campo"><label>Obra social</label><input type="text" id="n-os" placeholder="IOMA / Particular..."></div>
+        <div class="campo"><label>Primera entrevista</label><input type="date" id="n-primera"></div>
+        <div class="campo"><label>Motivo de consulta</label><textarea id="n-motivo" placeholder="Motivo principal de consulta..." style="min-height:60px"></textarea></div>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-label">🤝 Paciente de Colectivando</div>
+        <label class="switch"><input type="checkbox" id="n-colectivando"><span class="slider"></span></label>
+      </div>
+
+      <button class="btn-primary" onclick="crearPaciente()"><i class="ti ti-user-plus"></i> Crear ficha</button>
+      <button class="btn-outline" onclick="cerrarNuevoPaciente()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, set, get, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+    authDomain: "metanoia-caro.firebaseapp.com",
+    projectId: "metanoia-caro",
+    storageBucket: "metanoia-caro.firebasestorage.app",
+    messagingSenderId: "241874727",
+    appId: "1:241874727:web:ac149b414b517019631b02",
+    databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window.db = db;
+  window.dbRef = ref;
+  window.dbSet = set;
+  window.dbGet = get;
+  window.dbPush = push;
+  window.dbOnValue = onValue;
+  window.dbUpdate = update;
+  window.dbRemove = remove;
+
+  cargarPacientes();
+</script>
+
+<script>
+// ESTADO
+let pacientes = {};
+let pacienteActualId = null;
+let franjaActual = 'nino';
+let filtroActual = 'todos';
+let meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// CARGAR PACIENTES
+function cargarPacientes() {
+  if (!window.db) { setTimeout(cargarPacientes, 500); return; }
+  window.dbOnValue(window.dbRef(window.db, 'pacientes'), snap => {
+    pacientes = snap.exists() ? snap.val() : {};
+    renderLista();
+  });
+}
+
+function renderLista(busqueda = '', filtro = filtroActual) {
+  const body = document.getElementById('lista-body');
+  const total = Object.keys(pacientes).length;
+  document.getElementById('cover-sub-count').textContent = `${total} paciente${total !== 1 ? 's' : ''} en total`;
+
+  const lista = Object.entries(pacientes).filter(([id, p]) => {
+    const matchBusqueda = !busqueda || p.nombre?.toLowerCase().includes(busqueda.toLowerCase());
+    const matchFiltro = filtro === 'todos' ||
+      (filtro === 'nino' && p.franja === 'nino') ||
+      (filtro === 'adolescente' && p.franja === 'adolescente') ||
+      (filtro === 'adulto' && p.franja === 'adulto') ||
+      (filtro === 'colectivando' && p.colectivando) ||
+      (filtro === 'os' && p.os_nombre && p.os_nombre !== 'Particular');
+    return matchBusqueda && matchFiltro;
+  });
+
+  if (lista.length === 0) {
+    body.innerHTML = `<div class="empty-state"><div class="emoji">👤</div><p>${total === 0 ? 'Todavía no tenés pacientes.<br>Tocá el + para crear la primera ficha.' : 'Sin resultados para esta búsqueda.'}</p></div>`;
+    return;
+  }
+
+  const colores = ['#719176','#56112B','#D65FA9','#4a6a50','#8a2a50','#a03a7a','#2a5a98','#7a4010'];
+  body.innerHTML = lista.map(([id, p], i) => {
+    const iniciales = (p.nombre || '?').split(',').map(s => s.trim()[0]).slice(0,2).join('').toUpperCase();
+    const color = colores[i % colores.length];
+    const franjaLabel = p.franja === 'nino' ? 'Niño' : p.franja === 'adolescente' ? 'Adolescente' : 'Adulto';
+    const franjaTag = p.franja === 'nino' ? 'tag-nino' : p.franja === 'adolescente' ? 'tag-adol' : 'tag-adult';
+    return `
+      <div class="pac-card ${p.colectivando ? 'colectivando' : ''}" onclick="abrirPaciente('${id}')">
+        <div class="pac-avatar" style="background:${color}">${iniciales}</div>
+        <div class="pac-info">
+          <div class="pac-nombre">${p.nombre || 'Sin nombre'}</div>
+          <div class="pac-det">${p.diagnostico || 'Sin diagnóstico'} · ${p.edad ? p.edad + ' años' : ''}</div>
+          <div class="pac-tags">
+            <span class="pac-tag ${franjaTag}">${franjaLabel}</span>
+            ${p.os_nombre ? `<span class="pac-tag tag-os">${p.os_nombre}</span>` : '<span class="pac-tag tag-part">Particular</span>'}
+            ${p.colectivando ? '<span class="pac-tag tag-colect">🤝 Colectivando</span>' : ''}
+          </div>
+        </div>
+        <i class="ti ti-chevron-right pac-arrow"></i>
+      </div>`;
+  }).join('');
+}
+
+function filtrarLista(busqueda) { renderLista(busqueda, filtroActual); }
+window.filtrarLista = filtrarLista;
+
+function setFiltro(filtro, btn) {
+  filtroActual = filtro;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLista(document.getElementById('search-input').value, filtro);
+}
+window.setFiltro = setFiltro;
+
+// ABRIR PACIENTE
+function abrirPaciente(id) {
+  pacienteActualId = id;
+  const p = pacientes[id];
+  if (!p) return;
+
+  const colores = ['#719176','#56112B','#D65FA9','#4a6a50'];
+  const iniciales = (p.nombre || '?').split(',').map(s => s.trim()[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('det-avatar').textContent = iniciales;
+  document.getElementById('det-avatar').style.background = p.colectivando ? '#D65FA9' : '#719176';
+  document.getElementById('det-nombre').textContent = p.nombre || '—';
+  document.getElementById('det-det').textContent = `${p.diagnostico || ''} · ${p.os_nombre || 'Particular'}${p.colectivando ? ' · 🤝 Colectivando' : ''}`;
+
+  // Llenar datos
+  document.getElementById('d-nombre').value = p.nombre || '';
+  document.getElementById('d-fnac').value = p.fnac || '';
+  document.getElementById('d-edad').value = p.edad || '';
+  document.getElementById('d-dni').value = p.dni || '';
+  document.getElementById('d-domicilio').value = p.domicilio || '';
+  document.getElementById('d-diagnostico').value = p.diagnostico || '';
+  document.getElementById('d-tel').value = p.tel || '';
+  document.getElementById('d-mail').value = p.mail || '';
+  document.getElementById('d-os-nombre').value = p.os_nombre || '';
+  document.getElementById('d-os-cuit').value = p.os_cuit || '';
+  document.getElementById('d-os-nro').value = p.os_nro || '';
+  document.getElementById('d-colectivando').checked = p.colectivando || false;
+  document.getElementById('d-escuela').value = p.escuela || '';
+  document.getElementById('d-grado').value = p.grado || '';
+  document.getElementById('d-turno').value = p.turno_div || '';
+  document.getElementById('d-docente').value = p.docente || '';
+  document.getElementById('d-docente-tel').value = p.docente_tel || '';
+
+  // Familia
+  const f = p.familia || {};
+  document.getElementById('f-madre-nombre').value = f.madre_nombre || '';
+  document.getElementById('f-madre-edad').value = f.madre_edad || '';
+  document.getElementById('f-madre-ocup').value = f.madre_ocup || '';
+  document.getElementById('f-madre-esc').value = f.madre_esc || '';
+  document.getElementById('f-madre-tel').value = f.madre_tel || '';
+  document.getElementById('f-padre-nombre').value = f.padre_nombre || '';
+  document.getElementById('f-padre-edad').value = f.padre_edad || '';
+  document.getElementById('f-padre-ocup').value = f.padre_ocup || '';
+  document.getElementById('f-padre-esc').value = f.padre_esc || '';
+  document.getElementById('f-padre-tel').value = f.padre_tel || '';
+
+  // Admisión
+  const a = p.admision || {};
+  document.getElementById('a-primera').value = a.primera || '';
+  document.getElementById('a-ingreso').value = a.ingreso || '';
+  document.getElementById('a-motivo').value = a.motivo || '';
+  document.getElementById('a-evaluacion').value = a.evaluacion || '';
+  document.getElementById('a-profesionales').value = a.profesionales || '';
+
+  // Perfil
+  const perf = p.perfil || {};
+  document.getElementById('p-cognitiva').value = perf.cognitiva || '';
+  document.getElementById('p-aprendizaje').value = perf.aprendizaje || '';
+  document.getElementById('p-motora').value = perf.motora || '';
+  document.getElementById('p-socioafectiva').value = perf.socioafectiva || '';
+  document.getElementById('p-conductual').value = perf.conductual || '';
+  document.getElementById('p-gustos').value = perf.gustos || '';
+
+  // Sesiones
+  cargarSesiones(id);
+
+  // Cobros
+  document.getElementById('c-valor').value = p.valor_sesion || '';
+  document.getElementById('c-hs').value = p.hs_mes || '';
+  renderCobrosTabla(p.cobros || {});
+
+  // Activar primera tab
+  setTab('datos');
+  document.getElementById('vista-paciente').classList.add('open');
+}
+window.abrirPaciente = abrirPaciente;
+
+function cerrarDetalle() {
+  document.getElementById('vista-paciente').classList.remove('open');
+  pacienteActualId = null;
+}
+window.cerrarDetalle = cerrarDetalle;
+
+// TABS
+function setTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.itab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const tabs = ['datos','familia','admision','sesiones','cobros','docs'];
+  document.querySelectorAll('.itab')[tabs.indexOf(tab)].classList.add('active');
+}
+window.setTab = setTab;
+
+// GUARDAR DATOS
+async function guardarPaciente() {
+  if (!pacienteActualId || !window.db) return;
+  const datos = {
+    nombre: document.getElementById('d-nombre').value,
+    fnac: document.getElementById('d-fnac').value,
+    edad: document.getElementById('d-edad').value,
+    dni: document.getElementById('d-dni').value,
+    domicilio: document.getElementById('d-domicilio').value,
+    diagnostico: document.getElementById('d-diagnostico').value,
+    tel: document.getElementById('d-tel').value,
+    mail: document.getElementById('d-mail').value,
+    os_nombre: document.getElementById('d-os-nombre').value,
+    os_cuit: document.getElementById('d-os-cuit').value,
+    os_nro: document.getElementById('d-os-nro').value,
+    colectivando: document.getElementById('d-colectivando').checked,
+    escuela: document.getElementById('d-escuela').value,
+    grado: document.getElementById('d-grado').value,
+    turno_div: document.getElementById('d-turno').value,
+    docente: document.getElementById('d-docente').value,
+    docente_tel: document.getElementById('d-docente-tel').value,
+  };
+  await window.dbUpdate(window.dbRef(window.db, `pacientes/${pacienteActualId}`), datos);
+  mostrarToast('✓ Datos guardados');
+  document.getElementById('det-nombre').textContent = datos.nombre;
+}
+window.guardarPaciente = guardarPaciente;
+
+async function guardarFamilia() {
+  if (!pacienteActualId || !window.db) return;
+  const familia = {
+    madre_nombre: document.getElementById('f-madre-nombre').value,
+    madre_edad: document.getElementById('f-madre-edad').value,
+    madre_ocup: document.getElementById('f-madre-ocup').value,
+    madre_esc: document.getElementById('f-madre-esc').value,
+    madre_tel: document.getElementById('f-madre-tel').value,
+    padre_nombre: document.getElementById('f-padre-nombre').value,
+    padre_edad: document.getElementById('f-padre-edad').value,
+    padre_ocup: document.getElementById('f-padre-ocup').value,
+    padre_esc: document.getElementById('f-padre-esc').value,
+    padre_tel: document.getElementById('f-padre-tel').value,
+  };
+  await window.dbSet(window.dbRef(window.db, `pacientes/${pacienteActualId}/familia`), familia);
+  mostrarToast('✓ Familia guardada');
+}
+window.guardarFamilia = guardarFamilia;
+
+async function guardarAdmision() {
+  if (!pacienteActualId || !window.db) return;
+  const admision = {
+    primera: document.getElementById('a-primera').value,
+    ingreso: document.getElementById('a-ingreso').value,
+    motivo: document.getElementById('a-motivo').value,
+    evaluacion: document.getElementById('a-evaluacion').value,
+    profesionales: document.getElementById('a-profesionales').value,
+  };
+  const perfil = {
+    cognitiva: document.getElementById('p-cognitiva').value,
+    aprendizaje: document.getElementById('p-aprendizaje').value,
+    motora: document.getElementById('p-motora').value,
+    socioafectiva: document.getElementById('p-socioafectiva').value,
+    conductual: document.getElementById('p-conductual').value,
+    gustos: document.getElementById('p-gustos').value,
+  };
+  await window.dbSet(window.dbRef(window.db, `pacientes/${pacienteActualId}/admision`), admision);
+  await window.dbSet(window.dbRef(window.db, `pacientes/${pacienteActualId}/perfil`), perfil);
+  mostrarToast('✓ Admisión y perfil guardados');
+}
+window.guardarAdmision = guardarAdmision;
+
+// SESIONES
+function cargarSesiones(pacId) {
+  if (!window.db) return;
+  window.dbGet(window.dbRef(window.db, `pacientes/${pacId}/sesiones`)).then(snap => {
+    const lista = document.getElementById('sesiones-lista');
+    if (!snap.exists()) {
+      lista.innerHTML = '<div class="empty-state"><div class="emoji">📝</div><p>Sin sesiones registradas aún</p></div>';
+      return;
+    }
+    const sesiones = snap.val();
+    const arr = Object.entries(sesiones).sort((a,b) => b[1].fecha?.localeCompare(a[1].fecha || '') || 0);
+    lista.innerHTML = arr.map(([id, s], i) => `
+      <div class="sesion-card">
+        <div class="sesion-header">
+          <span class="sesion-num">Sesión Nº ${s.num || (arr.length - i)}</span>
+          <span class="sesion-fecha">${s.fecha || '—'}</span>
+        </div>
+        ${s.objetivos ? `<div style="font-size:10px;font-weight:700;color:var(--texto2);margin-bottom:4px">Objetivos: ${s.objetivos}</div>` : ''}
+        <div class="sesion-texto">${s.notas || 'Sin notas'}</div>
+        ${s.tarea ? `<div style="font-size:10px;color:var(--trabajo-dark);margin-top:6px;font-weight:600">📚 Tarea: ${s.tarea}</div>` : ''}
+        <div style="font-size:9px;color:var(--texto2);margin-top:5px">${s.finalizado === 'si' ? '✓ Finalizada' : '⏳ Continúa'}</div>
+      </div>`).join('');
+  });
+}
+
+function toggleNuevaSesion() {
+  const form = document.getElementById('nueva-sesion-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('s-fecha').value = new Date().toISOString().split('T')[0];
+  }
+}
+window.toggleNuevaSesion = toggleNuevaSesion;
+
+async function guardarSesion() {
+  if (!pacienteActualId || !window.db) return;
+  const sesion = {
+    fecha: document.getElementById('s-fecha').value,
+    num: document.getElementById('s-num').value,
+    objetivos: document.getElementById('s-objetivos').value,
+    notas: document.getElementById('s-notas').value,
+    tarea: document.getElementById('s-tarea').value,
+    finalizado: document.getElementById('s-finalizado').value,
+    timestamp: Date.now()
+  };
+  await window.dbPush(window.dbRef(window.db, `pacientes/${pacienteActualId}/sesiones`), sesion);
+  toggleNuevaSesion();
+  cargarSesiones(pacienteActualId);
+  mostrarToast('✓ Sesión guardada');
+  ['s-fecha','s-num','s-objetivos','s-notas','s-tarea'].forEach(id => document.getElementById(id).value = '');
+}
+window.guardarSesion = guardarSesion;
+
+// COBROS
+function renderCobrosTabla(cobros) {
+  const valor = parseFloat(document.getElementById('c-valor').value) || 0;
+  const hs = parseFloat(document.getElementById('c-hs').value) || 0;
+  const monto = valor * hs;
+  const colect = Math.round(monto * 0.4);
+  const paraMi = monto - colect;
+
+  document.getElementById('cobros-tabla').innerHTML = meses.map((mes, i) => {
+    const key = `m${i+1}`;
+    const c = cobros[key] || {};
+    return `
+      <div class="cobro-mes">
+        <div class="cobro-mes-nombre">${mes}</div>
+        <div style="flex:1;padding:0 8px">
+          <div style="font-size:9px;color:var(--texto2)">Para mí: $${paraMi.toLocaleString('es-AR')}</div>
+          <div style="font-size:9px;color:var(--yo-dark)">Colect.: $${colect.toLocaleString('es-AR')}</div>
+        </div>
+        <div class="cobro-mes-monto">$${monto.toLocaleString('es-AR')}</div>
+        <div class="cobro-estado ${c.pagado ? 'estado-pagado' : 'estado-pendiente'}" onclick="togglePago('${key}')" style="cursor:pointer">${c.pagado ? 'Pagado' : 'Pendiente'}</div>
+      </div>`;
+  }).join('');
+}
+
+function actualizarCobros() {
+  const cobros = pacientes[pacienteActualId]?.cobros || {};
+  renderCobrosTabla(cobros);
+}
+window.actualizarCobros = actualizarCobros;
+
+async function togglePago(mes) {
+  if (!pacienteActualId || !window.db) return;
+  const actual = pacientes[pacienteActualId]?.cobros?.[mes]?.pagado || false;
+  await window.dbSet(window.dbRef(window.db, `pacientes/${pacienteActualId}/cobros/${mes}`), {
+    pagado: !actual,
+    fecha: new Date().toISOString().split('T')[0]
+  });
+  mostrarToast(!actual ? '✓ Marcado como pagado' : 'Marcado como pendiente');
+}
+window.togglePago = togglePago;
+
+async function guardarCobros() {
+  if (!pacienteActualId || !window.db) return;
+  await window.dbUpdate(window.dbRef(window.db, `pacientes/${pacienteActualId}`), {
+    valor_sesion: parseFloat(document.getElementById('c-valor').value) || 0,
+    hs_mes: parseFloat(document.getElementById('c-hs').value) || 0,
+  });
+  mostrarToast('✓ Cobros guardados');
+}
+window.guardarCobros = guardarCobros;
+
+// NUEVO PACIENTE
+function abrirNuevoPaciente() {
+  document.getElementById('vista-nuevo-paciente').classList.add('open');
+}
+window.abrirNuevoPaciente = abrirNuevoPaciente;
+
+function cerrarNuevoPaciente() {
+  document.getElementById('vista-nuevo-paciente').classList.remove('open');
+}
+window.cerrarNuevoPaciente = cerrarNuevoPaciente;
+
+function setFranja(f) {
+  franjaActual = f;
+  ['nino','adolescente','adulto'].forEach(x => {
+    document.getElementById('f-' + x).classList.toggle('active', x === f);
+  });
+}
+window.setFranja = setFranja;
+
+async function crearPaciente() {
+  if (!window.db) return;
+  const nombre = document.getElementById('n-nombre').value.trim();
+  if (!nombre) { mostrarToast('⚠ Ingresá el nombre del paciente'); return; }
+
+  const fnac = document.getElementById('n-fnac').value;
+  let edad = '';
+  if (fnac) {
+    const hoy = new Date();
+    const nac = new Date(fnac);
+    edad = String(hoy.getFullYear() - nac.getFullYear());
+  }
+
+  const nuevo = {
+    nombre,
+    franja: franjaActual,
+    fnac,
+    edad,
+    dni: document.getElementById('n-dni').value,
+    diagnostico: document.getElementById('n-diagnostico').value,
+    tel: document.getElementById('n-tel').value,
+    os_nombre: document.getElementById('n-os').value || 'Particular',
+    colectivando: document.getElementById('n-colectivando').checked,
+    admision: {
+      primera: document.getElementById('n-primera').value,
+      motivo: document.getElementById('n-motivo').value,
+    },
+    creado: Date.now()
+  };
+
+  const ref = await window.dbPush(window.dbRef(window.db, 'pacientes'), nuevo);
+  cerrarNuevoPaciente();
+  mostrarToast('✓ Ficha creada correctamente');
+
+  // Limpiar
+  ['n-nombre','n-dni','n-diagnostico','n-tel','n-os','n-motivo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('n-fnac').value = '';
+  document.getElementById('n-primera').value = '';
+  document.getElementById('n-colectivando').checked = false;
+  setFranja('nino');
+
+  setTimeout(() => abrirPaciente(ref.key), 300);
+}
+window.crearPaciente = crearPaciente;
+
+async function eliminarPaciente() {
+  if (!pacienteActualId || !window.db) return;
+  const nombre = pacientes[pacienteActualId]?.nombre || 'este paciente';
+  if (!confirm(`¿Eliminar la ficha de ${nombre}? Esta acción no se puede deshacer.`)) return;
+  await window.dbRemove(window.dbRef(window.db, `pacientes/${pacienteActualId}`));
+  cerrarDetalle();
+  mostrarToast('Ficha eliminada');
+}
+window.eliminarPaciente = eliminarPaciente;
+
+// TÉCNICAS
+function agregarTecnica() {
+  const lista = document.getElementById('tecnicas-lista');
+  const item = document.createElement('div');
+  item.className = 'tecnica-item';
+  item.innerHTML = '<input type="checkbox"><input type="text" placeholder="Nombre de la técnica o prueba...">';
+  lista.appendChild(item);
+}
+window.agregarTecnica = agregarTecnica;
+
+// TOAST
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
