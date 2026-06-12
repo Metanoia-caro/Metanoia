@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#56112B">
+<title>Cobros — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+:root{
+  --hogar:#56112B;--hogar-soft:#f0d8e2;--hogar-mid:#8a2a50;
+  --trabajo:#719176;--trabajo-soft:#e0ebe1;--trabajo-dark:#4a6a50;
+  --yo:#D65FA9;--yo-soft:#fae0f2;--yo-dark:#a03a7a;
+  --fondo:#faf6f0;--fondo2:#f2ece4;--texto:#2a1018;--texto2:#6a5060;--borde:#ddd0cc;
+}
+.app{width:100%;height:100%;max-width:430px;margin:0 auto;background:var(--fondo);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+.cover{background:linear-gradient(160deg,var(--hogar) 0%,#1a0010 100%);padding:48px 18px 0;flex-shrink:0;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:32px;margin-bottom:14px}
+.cover-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff}
+.cover-sub{font-size:10px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:2px}
+
+.vtoggle{display:flex;gap:4px}
+.vtbtn{padding:5px 10px;border-radius:7px;font-size:10px;font-weight:600;border:0.5px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.vtbtn.active{background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.4)}
+
+.nav-bar{display:flex;align-items:center;justify-content:space-between;background:#6b1a3a;padding:8px 14px;flex-shrink:0}
+.nav-arrow{background:none;border:none;color:rgba(255,255,255,0.7);font-size:22px;cursor:pointer;padding:2px 8px;font-family:'Inter',sans-serif}
+.nav-label{font-size:12px;font-weight:600;color:#fff}
+
+.body{flex:1;overflow:hidden}
+.vista{display:none;height:100%;overflow-y:auto;padding:12px 12px 90px;-webkit-overflow-scrolling:touch}
+.vista.active{display:block}
+
+/* RESUMEN TARJETA */
+.resumen-card{background:linear-gradient(135deg,var(--hogar),#1a0010);border-radius:14px;padding:16px;margin-bottom:12px}
+.rc-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
+.rc-monto{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:#fff}
+.rc-sub{font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;margin-bottom:12px}
+.rc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.rc-item{background:rgba(255,255,255,0.1);border-radius:8px;padding:9px 6px;text-align:center}
+.rc-item-monto{font-size:13px;font-weight:700;color:#fff}
+.rc-item-label{font-size:8px;color:rgba(255,255,255,0.5);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+.rc-item.verde .rc-item-monto{color:#a8e8a8}
+.rc-item.rosa .rc-item-monto{color:var(--yo)}
+
+.sec-label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1.5px;text-transform:uppercase;margin:12px 0 7px}
+
+/* PACIENTE COBRO */
+.pac-cobro{background:#fff;border:0.5px solid var(--borde);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.pc-header{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer}
+.pc-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.pc-info{flex:1}
+.pc-nombre{font-size:12px;font-weight:600;color:var(--texto)}
+.pc-hs{font-size:10px;color:var(--texto2);margin-top:1px}
+.pc-monto{font-size:14px;font-weight:700}
+.pc-estado{font-size:8px;font-weight:700;padding:3px 8px;border-radius:7px;cursor:pointer}
+.est-pag{background:#d6f0e8;color:#1a5a3a}
+.est-pend{background:#fde8e8;color:#9a2a2a}
+.est-parc{background:#fae8cc;color:#7a4010}
+.pc-arrow{font-size:16px;color:var(--borde);transition:transform .2s}
+.pc-arrow.open{transform:rotate(90deg)}
+
+.pc-detalle{display:none;border-top:0.5px solid var(--fondo2);padding:10px 12px}
+.pc-detalle.open{display:block}
+
+.det-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px}
+.det-item{display:flex;flex-direction:column;gap:3px}
+.det-label{font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px}
+.det-input{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.det-input:focus{border-color:var(--hogar);background:#fff}
+.det-select{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+
+.colect-strip{background:var(--yo-soft);border-radius:8px;padding:8px 11px;display:flex;align-items:center;gap:7px;margin-top:4px}
+.colect-strip span{font-size:16px}
+.colect-txt{font-size:10px;color:var(--yo-dark);flex:1;font-weight:600}
+.colect-monto{font-size:13px;font-weight:700;color:var(--yo-dark)}
+
+.save-det-btn{width:100%;padding:9px;background:var(--hogar);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* VISTA POR PACIENTE */
+.pac-sel{background:#fff;border:0.5px solid var(--borde);border-radius:9px;padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.pac-sel i{font-size:18px;color:var(--hogar)}
+.pac-sel select{flex:1;border:none;background:transparent;font-size:12px;font-family:'Inter',sans-serif;color:var(--texto);outline:none}
+
+.anual-wrap{overflow-x:auto}
+.anual-tabla{width:100%;border-collapse:collapse;font-size:10px;min-width:600px}
+.anual-tabla th{background:var(--fondo2);color:var(--texto2);font-size:9px;font-weight:700;padding:7px 5px;text-align:center;border:0.5px solid var(--borde);white-space:nowrap}
+.anual-tabla th.row-h{text-align:left;padding-left:8px}
+.anual-tabla td{border:0.5px solid var(--borde);padding:0}
+.anual-tabla td input{border:none;padding:6px 4px;font-size:10px;width:100%;background:#fff;color:var(--texto);font-family:'Inter',sans-serif;outline:none;text-align:center;min-width:52px}
+.anual-tabla td input:focus{background:#fffaf8}
+.anual-tabla .rl{background:var(--fondo2);font-size:9px;font-weight:700;color:var(--texto2);padding:6px 8px;white-space:nowrap}
+.anual-tabla .mes-act{background:#f0f7ee}
+.anual-tabla td.pagado{background:#d6f0e8}
+.anual-tabla td.pendiente{background:#fde8e8}
+
+.hs-strip{display:flex;align-items:center;justify-content:space-between;background:var(--fondo2);border-radius:8px;padding:9px 12px;margin-bottom:10px}
+.hs-label{font-size:10px;color:var(--texto2);font-weight:600}
+.hs-val{font-size:13px;font-weight:700;color:var(--texto)}
+
+/* ARANCELES */
+.arancel-card{background:#fff;border:0.5px solid var(--borde);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.ar-header{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer}
+.ar-icono{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ar-info{flex:1}
+.ar-nombre{font-size:12px;font-weight:600;color:var(--texto)}
+.ar-desde{font-size:9px;color:var(--texto2);margin-top:1px}
+.ar-valor{text-align:right}
+.ar-monto{font-size:15px;font-weight:700;color:var(--trabajo-dark)}
+.ar-ars{font-size:9px;color:var(--texto2)}
+.ar-detalle{display:none;border-top:0.5px solid var(--fondo2);padding:10px 12px}
+.ar-detalle.open{display:block}
+
+.hist-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--fondo2);border-radius:6px;margin-bottom:4px}
+.hist-fecha{font-size:10px;color:var(--texto2);min-width:60px}
+.hist-monto{font-size:11px;font-weight:500;color:var(--texto);flex:1}
+.hist-badge{font-size:8px;padding:2px 6px;border-radius:5px;font-weight:700}
+.hb-act{background:#d6f0e8;color:#1a5a3a}
+.hb-ant{background:var(--fondo2);color:var(--texto2)}
+
+.campo{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.campo label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase}
+.campo input,.campo select{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:7px 10px;font-size:11px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.campo input:focus,.campo select:focus{border-color:var(--hogar);background:#fff}
+.crow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+
+.btn{width:100%;padding:11px;background:var(--hogar);color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-add{display:flex;align-items:center;gap:6px;width:100%;padding:10px 12px;background:var(--trabajo-soft);border:0.5px dashed var(--trabajo);border-radius:9px;color:var(--trabajo-dark);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:4px}
+.aviso{background:#fef9f0;border:0.5px solid #e8d8b0;border-radius:8px;padding:9px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start}
+.aviso i{color:#b8860b;font-size:15px;margin-top:1px;flex-shrink:0}
+.aviso p{font-size:10px;color:#6b5a2a;line-height:1.5}
+
+.exportar-btn{display:flex;align-items:center;gap:7px;width:100%;padding:10px 12px;background:#fff;border:0.5px solid var(--borde);border-radius:9px;color:var(--hogar);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--trabajo-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:30px;color:var(--texto2);font-size:11px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="cover">
+    <button class="cover-back" onclick="location.href='index.html'"><i class="ti ti-arrow-left"></i> Inicio</button>
+    <div class="cover-row">
+      <div>
+        <div class="cover-title">💰 Cobros</div>
+        <div class="cover-sub" id="cover-sub">Cargando...</div>
+      </div>
+      <div class="vtoggle">
+        <button class="vtbtn active" id="btn-mes" onclick="setVista('mes')">Por mes</button>
+        <button class="vtbtn" id="btn-pac" onclick="setVista('pac')">Por paciente</button>
+        <button class="vtbtn" id="btn-aran" onclick="setVista('aran')">Aranceles</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-arrow" onclick="navMes(-1)">‹</button>
+    <span class="nav-label" id="nav-label">Cargando...</span>
+    <button class="nav-arrow" onclick="navMes(1)">›</button>
+  </div>
+
+  <div class="body">
+
+    <!-- VISTA POR MES -->
+    <div class="vista active" id="vista-mes">
+      <div class="resumen-card">
+        <div class="rc-label">💰 Ingresos netos del mes</div>
+        <div class="rc-monto" id="rc-neto">$ —</div>
+        <div class="rc-sub" id="rc-sub">Después de descuentos</div>
+        <div class="rc-grid">
+          <div class="rc-item"><div class="rc-item-monto" id="rc-total">$ —</div><div class="rc-item-label">Total cobrado</div></div>
+          <div class="rc-item rosa"><div class="rc-item-monto" id="rc-colect">$ —</div><div class="rc-item-label">Colectivando</div></div>
+          <div class="rc-item verde"><div class="rc-item-monto" id="rc-parami">$ —</div><div class="rc-item-label">Para mí ✓</div></div>
+        </div>
+      </div>
+
+      <button class="exportar-btn" onclick="exportar()"><i class="ti ti-download"></i> Exportar resumen del mes</button>
+
+      <div class="sec-label">Pacientes · <span id="mes-label-sec">este mes</span></div>
+      <div id="lista-mes"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- VISTA POR PACIENTE -->
+    <div class="vista" id="vista-pac">
+      <div class="pac-sel">
+        <i class="ti ti-user"></i>
+        <select id="pac-select" onchange="renderAnual()">
+          <option value="">Seleccioná un paciente...</option>
+        </select>
+      </div>
+      <div class="hs-strip">
+        <span class="hs-label">Horas acumuladas 2025</span>
+        <span class="hs-val" id="hs-acum">—</span>
+      </div>
+      <div class="anual-wrap">
+        <table class="anual-tabla" id="tabla-anual"></table>
+      </div>
+      <button class="btn" onclick="guardarAnual()" style="margin-top:10px"><i class="ti ti-check"></i> Guardar cambios</button>
+    </div>
+
+    <!-- ARANCELES -->
+    <div class="vista" id="vista-aran">
+      <div class="aviso">
+        <i class="ti ti-shield-check"></i>
+        <p>Al actualizar un valor, los cobros ya registrados <strong>no se modifican</strong>. El historial guarda cada precio con su fecha.</p>
+      </div>
+
+      <div class="sec-label">Mis prestaciones</div>
+      <div id="aranceles-lista"><div class="empty">Cargando aranceles...</div></div>
+
+      <button class="btn-add" onclick="abrirNuevoArancel()"><i class="ti ti-plus"></i> Nueva prestación</button>
+
+      <div id="nuevo-arancel-form" style="display:none;background:var(--hogar-soft);border:0.5px solid var(--hogar);border-radius:10px;padding:12px;margin-top:8px">
+        <div style="font-size:12px;font-weight:600;color:var(--hogar);margin-bottom:10px">Nueva prestación</div>
+        <div class="campo"><label>Nombre de la prestación</label><input id="na-nombre" placeholder="Ej: Evaluación psicopedagógica..."></div>
+        <div class="campo"><label>Ícono</label>
+          <select id="na-icono">
+            <option value="🧠">🧠 Cognitivo</option><option value="💬">💬 Sesión</option>
+            <option value="📄">📄 Informe</option><option value="🤝">🤝 Reunión</option>
+            <option value="📋">📋 Planificación</option><option value="🎯">🎯 Evaluación</option>
+            <option value="📚">📚 Asesoramiento</option><option value="⭐">⭐ Otro</option>
+          </select>
+        </div>
+        <div class="crow">
+          <div class="campo"><label>Valor inicial ($ARS)</label><input type="number" id="na-valor" placeholder="0"></div>
+          <div class="campo"><label>Se cobra por</label>
+            <select id="na-unidad">
+              <option value="hora">hora</option><option value="sesión">sesión</option>
+              <option value="informe">informe</option><option value="reunión">reunión</option>
+              <option value="prestación">prestación</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo"><label>Fecha de vigencia</label><input type="date" id="na-fecha"></div>
+        <button class="btn" onclick="guardarNuevoArancel()"><i class="ti ti-check"></i> Guardar prestación</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+  authDomain: "metanoia-caro.firebaseapp.com",
+  projectId: "metanoia-caro",
+  storageBucket: "metanoia-caro.firebasestorage.app",
+  messagingSenderId: "241874727",
+  appId: "1:241874727:web:ac149b414b517019631b02",
+  databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ESTADO
+let mesActual = new Date().getMonth();
+let anioActual = new Date().getFullYear();
+let pacientes = {};
+let cobros = {};
+let aranceles = {};
+let vistaActual = 'mes';
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const COLORES = ['#719176','#56112B','#D65FA9','#4a6a50','#8a2a50','#a03a7a','#2a5a98','#7a4010'];
+
+// CARGAR
+db.ref('pacientes').on('value', snap => {
+  pacientes = snap.val() || {};
+  poblarSelectores();
+  renderMes();
+  renderAnual();
+});
+db.ref('cobros').on('value', snap => { cobros = snap.val() || {}; renderMes(); renderAnual(); });
+db.ref('aranceles').on('value', snap => { aranceles = snap.val() || {}; renderAranceles(); });
+
+function poblarSelectores() {
+  const sel = document.getElementById('pac-select');
+  const valActual = sel.value;
+  sel.innerHTML = '<option value="">Seleccioná un paciente...</option>';
+  Object.entries(pacientes).forEach(([id, p]) => {
+    sel.innerHTML += `<option value="${id}" ${id === valActual ? 'selected' : ''}>${p.nombre || 'Sin nombre'}</option>`;
+  });
+}
+
+// NAVEGACIÓN MES
+function navMes(dir) {
+  mesActual += dir;
+  if (mesActual > 11) { mesActual = 0; anioActual++; }
+  if (mesActual < 0) { mesActual = 11; anioActual--; }
+  actualizarNavLabel();
+  renderMes();
+}
+
+function actualizarNavLabel() {
+  const label = `${MESES[mesActual]} ${anioActual}`;
+  document.getElementById('nav-label').textContent = label;
+  document.getElementById('cover-sub').textContent = `Control de cobros · ${label}`;
+  document.getElementById('mes-label-sec').textContent = `${MESES[mesActual].toLowerCase()} ${anioActual}`;
+}
+
+// VISTA MES
+function renderMes() {
+  actualizarNavLabel();
+  const mesKey = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
+
+  let totalCobrado = 0;
+  let totalColect = 0;
+
+  const lista = document.getElementById('lista-mes');
+  if (!Object.keys(pacientes).length) { lista.innerHTML = '<div class="empty">Sin pacientes cargados</div>'; return; }
+
+  const items = Object.entries(pacientes).map(([id, p], i) => {
+    const cobro = cobros[mesKey]?.[id] || {};
+    const valor = parseFloat(p.valor_sesion || 0);
+    const hs = parseFloat(p.hs_mes || 0);
+    const monto = cobro.monto_custom || (valor * hs);
+    const colect = Math.round(monto * 0.4);
+    const paraMi = monto - colect;
+    const pagado = cobro.pagado || false;
+    const transferido = cobro.transferido || false;
+
+    if (pagado) { totalCobrado += monto; totalColect += colect; }
+
+    const ini = (p.nombre || '?').split(',').map(s => s.trim()[0] || '?').slice(0, 2).join('').toUpperCase();
+    const color = COLORES[i % COLORES.length];
+    const estCls = pagado ? 'est-pag' : 'est-pend';
+    const estTxt = pagado ? 'Pagado' : 'Pendiente';
+
+    return `<div class="pac-cobro">
+      <div class="pc-header" onclick="toggleDet('det-${id}','arr-${id}')">
+        <div class="pc-av" style="background:${color}">${ini}</div>
+        <div class="pc-info">
+          <div class="pc-nombre">${p.nombre || '—'}${p.colectivando ? ' 🤝' : ''}</div>
+          <div class="pc-hs">${hs} hs · $${valor.toLocaleString('es-AR')}/sesión</div>
+        </div>
+        <div class="pc-monto" style="color:${pagado ? 'var(--trabajo-dark)' : 'var(--texto2)'}">$${monto.toLocaleString('es-AR')}</div>
+        <div class="pc-estado ${estCls}" onclick="event.stopPropagation();togglePago('${mesKey}','${id}',${pagado})">${estTxt}</div>
+        <i class="ti ti-chevron-right pc-arrow" id="arr-${id}"></i>
+      </div>
+      <div class="pc-detalle" id="det-${id}">
+        <div class="det-grid">
+          <div class="det-item"><div class="det-label">Monto ($ARS)</div><input class="det-input" type="number" value="${monto}" id="monto-${id}" placeholder="0" onchange="actualizarMonto('${mesKey}','${id}',this.value)"></div>
+          <div class="det-item"><div class="det-label">Fecha de cobro</div><input class="det-input" type="date" value="${cobro.fecha_cobro || ''}" id="fecha-${id}" onchange="guardarCampoCobro('${mesKey}','${id}','fecha_cobro',this.value)"></div>
+          <div class="det-item"><div class="det-label">Para mí ($ARS)</div><input class="det-input" type="text" value="$${paraMi.toLocaleString('es-AR')}" readonly style="color:var(--trabajo-dark);font-weight:700"></div>
+          <div class="det-item"><div class="det-label">Transferido</div><select class="det-select" onchange="guardarCampoCobro('${mesKey}','${id}','transferido',this.value==='si')"><option value="${transferido ? 'si' : 'no'}">${transferido ? 'Sí' : 'No'}</option>${transferido ? '<option value="no">No</option>' : '<option value="si">Sí</option>'}</select></div>
+        </div>
+        <div class="colect-strip">
+          <span>🤝</span>
+          <span class="colect-txt">Para Colectivando (40%)</span>
+          <span class="colect-monto">$${colect.toLocaleString('es-AR')}</span>
+        </div>
+        <button class="save-det-btn" onclick="guardarCobro('${mesKey}','${id}')">✓ Guardar</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  lista.innerHTML = items;
+
+  const totalParaMi = totalCobrado - totalColect;
+  document.getElementById('rc-total').textContent = `$${totalCobrado.toLocaleString('es-AR')}`;
+  document.getElementById('rc-colect').textContent = `$${totalColect.toLocaleString('es-AR')}`;
+  document.getElementById('rc-parami').textContent = `$${totalParaMi.toLocaleString('es-AR')}`;
+  document.getElementById('rc-neto').textContent = `$${totalParaMi.toLocaleString('es-AR')}`;
+  document.getElementById('rc-sub').textContent = `${MESES[mesActual]} ${anioActual} · Cobros registrados`;
+}
+
+function toggleDet(detId, arrId) {
+  const det = document.getElementById(detId);
+  const arr = document.getElementById(arrId);
+  det.classList.toggle('open');
+  if (arr) arr.classList.toggle('open');
+}
+
+async function togglePago(mesKey, pacId, actual) {
+  await db.ref(`cobros/${mesKey}/${pacId}/pagado`).set(!actual);
+  if (!actual) await db.ref(`cobros/${mesKey}/${pacId}/fecha_cobro`).set(new Date().toISOString().split('T')[0]);
+  toast(!actual ? '✓ Marcado como pagado' : 'Marcado como pendiente');
+}
+
+async function actualizarMonto(mesKey, pacId, val) {
+  await db.ref(`cobros/${mesKey}/${pacId}/monto_custom`).set(parseFloat(val) || 0);
+}
+
+async function guardarCampoCobro(mesKey, pacId, campo, val) {
+  await db.ref(`cobros/${mesKey}/${pacId}/${campo}`).set(val);
+}
+
+async function guardarCobro(mesKey, pacId) {
+  toast('✓ Cobro guardado');
+}
+
+// VISTA POR PACIENTE (ANUAL)
+function renderAnual() {
+  const pacId = document.getElementById('pac-select').value;
+  if (!pacId) { document.getElementById('tabla-anual').innerHTML = ''; document.getElementById('hs-acum').textContent = '—'; return; }
+  const p = pacientes[pacId] || {};
+  const valor = parseFloat(p.valor_sesion || 0);
+  const hs = parseFloat(p.hs_mes || 0);
+  const colores_mes = new Date().getMonth();
+
+  let hsTotal = 0;
+  const filas = ['HS', 'Monto ($ARS)', 'Pagado', 'Fecha cobro', 'Para mí', 'Colectivando', 'Transferido'];
+
+  let thead = '<thead><tr><th class="row-h">Concepto</th>';
+  MESES.forEach((m, i) => { thead += `<th class="${i === colores_mes ? 'mes-act' : ''}">${m.slice(0,3)}</th>`; });
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  filas.forEach((fila, fi) => {
+    tbody += `<tr><td class="rl">${fila}</td>`;
+    MESES.forEach((m, i) => {
+      const mesKey = `${anioActual}-${String(i + 1).padStart(2, '0')}`;
+      const c = cobros[mesKey]?.[pacId] || {};
+      const monto = c.monto_custom || (valor * hs);
+      const colect = Math.round(monto * 0.4);
+      const paraMi = monto - colect;
+      let val = '', cls = i === colores_mes ? 'mes-act' : '';
+      if (fi === 0) { val = c.hs || hs || ''; if (c.pagado && hs) hsTotal += parseFloat(hs); }
+      else if (fi === 1) val = monto ? monto.toLocaleString('es-AR') : '';
+      else if (fi === 2) { val = c.pagado ? 'Sí' : ''; cls += c.pagado ? ' pagado' : (c.pagado === false ? ' pendiente' : ''); }
+      else if (fi === 3) val = c.fecha_cobro || '';
+      else if (fi === 4) val = paraMi ? paraMi.toLocaleString('es-AR') : '';
+      else if (fi === 5) val = colect ? colect.toLocaleString('es-AR') : '';
+      else if (fi === 6) val = c.transferido ? 'Sí' : '';
+      tbody += `<td class="${cls}"><input value="${val}" placeholder="" data-mes="${mesKey}" data-pac="${pacId}" data-fila="${fi}" onchange="editarCeldaAnual(this)"></td>`;
+    });
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+
+  document.getElementById('tabla-anual').innerHTML = thead + tbody;
+  document.getElementById('hs-acum').textContent = `${hsTotal} hs acumuladas`;
+}
+
+async function editarCeldaAnual(input) {
+  const mesKey = input.dataset.mes;
+  const pacId = input.dataset.pac;
+  const fila = parseInt(input.dataset.fila);
+  const val = input.value;
+  const campos = ['hs', 'monto_custom', 'pagado', 'fecha_cobro', null, null, 'transferido'];
+  const campo = campos[fila];
+  if (!campo) return;
+  let valGuardar = val;
+  if (campo === 'pagado' || campo === 'transferido') valGuardar = val.toLowerCase() === 'sí' || val.toLowerCase() === 'si';
+  if (campo === 'monto_custom') valGuardar = parseFloat(val.replace(/\./g,'')) || 0;
+  await db.ref(`cobros/${mesKey}/${pacId}/${campo}`).set(valGuardar);
+}
+
+async function guardarAnual() { toast('✓ Cambios guardados'); }
+
+// ARANCELES
+function renderAranceles() {
+  const lista = document.getElementById('aranceles-lista');
+  if (!Object.keys(aranceles).length) {
+    lista.innerHTML = '<div class="empty">Sin prestaciones. Agregá la primera tocando el botón de abajo.</div>';
+    return;
+  }
+  lista.innerHTML = Object.entries(aranceles).map(([id, a]) => {
+    const hist = a.historial ? Object.entries(a.historial).sort((x,y) => y[1].ts - x[1].ts) : [];
+    const actual = hist[0]?.[1] || {};
+    return `<div class="arancel-card">
+      <div class="ar-header" onclick="toggleArancel('ar-${id}')">
+        <div class="ar-icono" style="background:var(--trabajo-soft)">${a.icono || '📋'}</div>
+        <div class="ar-info">
+          <div class="ar-nombre">${a.nombre || '—'}</div>
+          <div class="ar-desde">Vigente desde ${actual.fecha || '—'}</div>
+        </div>
+        <div class="ar-valor">
+          <div class="ar-monto">$${(actual.valor || 0).toLocaleString('es-AR')}</div>
+          <div class="ar-ars">por ${a.unidad || 'sesión'} · ARS</div>
+        </div>
+      </div>
+      <div class="ar-detalle" id="ar-${id}">
+        <div class="crow" style="margin-bottom:8px">
+          <div class="campo"><label>Nuevo valor (ARS)</label><input type="number" placeholder="0" id="nv-${id}"></div>
+          <div class="campo"><label>Fecha de vigencia</label><input type="date" id="nf-${id}"></div>
+        </div>
+        <div class="campo"><label>Nota (opcional)</label><input type="text" placeholder="Ej: actualización por inflación" id="nn-${id}"></div>
+        <button class="btn" onclick="actualizarArancel('${id}')"><i class="ti ti-check"></i> Actualizar valor</button>
+        <div style="font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin:10px 0 6px">Historial de valores</div>
+        ${hist.map(([hid, h], i) => `<div class="hist-item"><span class="hist-fecha">${h.fecha||'—'}</span><span class="hist-monto">$${(h.valor||0).toLocaleString('es-AR')} / ${a.unidad||'sesión'}</span><span class="hist-badge ${i===0?'hb-act':'hb-ant'}">${i===0?'Actual':'Anterior'}</span></div>`).join('')}
+        <button style="width:100%;padding:8px;background:transparent;color:#b85a5a;border:0.5px solid #f0d0d0;border-radius:8px;font-family:'Inter',sans-serif;font-size:10px;cursor:pointer;margin-top:8px" onclick="eliminarArancel('${id}')">Eliminar prestación</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleArancel(id) { document.getElementById(id).classList.toggle('open'); }
+
+async function actualizarArancel(id) {
+  const val = parseFloat(document.getElementById(`nv-${id}`).value);
+  const fecha = document.getElementById(`nf-${id}`).value;
+  if (!val || !fecha) { toast('⚠ Completá valor y fecha'); return; }
+  await db.ref(`aranceles/${id}/historial`).push({ valor: val, fecha, ts: Date.now() });
+  toast('✓ Valor actualizado. Cobros anteriores intactos.');
+  document.getElementById(`nv-${id}`).value = '';
+}
+
+async function eliminarArancel(id) {
+  if (!confirm('¿Eliminar esta prestación?')) return;
+  await db.ref('aranceles/' + id).remove();
+  toast('Prestación eliminada');
+}
+
+function abrirNuevoArancel() {
+  const f = document.getElementById('nuevo-arancel-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('na-fecha').value = new Date().toISOString().split('T')[0];
+}
+
+async function guardarNuevoArancel() {
+  const nombre = document.getElementById('na-nombre').value.trim();
+  const valor = parseFloat(document.getElementById('na-valor').value);
+  const fecha = document.getElementById('na-fecha').value;
+  if (!nombre) { toast('⚠ Ingresá el nombre'); return; }
+  const nuevo = { nombre, icono: document.getElementById('na-icono').value, unidad: document.getElementById('na-unidad').value, creado: Date.now() };
+  const ref = await db.ref('aranceles').push(nuevo);
+  await db.ref(`aranceles/${ref.key}/historial`).push({ valor: valor || 0, fecha, ts: Date.now() });
+  document.getElementById('nuevo-arancel-form').style.display = 'none';
+  document.getElementById('na-nombre').value = '';
+  document.getElementById('na-valor').value = '';
+  toast('✓ Prestación creada');
+}
+
+// VISTA
+function setVista(v) {
+  vistaActual = v;
+  ['mes','pac','aran'].forEach(x => {
+    document.getElementById('vista-' + x).classList.toggle('active', x === v);
+    document.getElementById('btn-' + x).classList.toggle('active', x === v);
+  });
+}
+
+function exportar() {
+  const mesKey = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
+  let txt = `METANOIA — Control de Cobros\n${MESES[mesActual]} ${anioActual}\n\n`;
+  Object.entries(pacientes).forEach(([id, p]) => {
+    const c = cobros[mesKey]?.[id] || {};
+    const monto = c.monto_custom || ((p.valor_sesion || 0) * (p.hs_mes || 0));
+    const colect = Math.round(monto * 0.4);
+    txt += `${p.nombre} — $${monto.toLocaleString('es-AR')} — ${c.pagado ? 'PAGADO' : 'PENDIENTE'} — Colectivando: $${colect.toLocaleString('es-AR')}\n`;
+  });
+  if (navigator.share) {
+    navigator.share({ title: `Cobros ${MESES[mesActual]} ${anioActual}`, text: txt });
+  } else {
+    navigator.clipboard.writeText(txt).then(() => toast('✓ Copiado al portapapeles'));
+  }
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+actualizarNavLabel();
+</script>
+</body>
+</html>
