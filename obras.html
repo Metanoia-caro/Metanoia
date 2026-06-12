@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#56112B">
+<title>Obras Sociales — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+:root{
+  --hogar:#56112B;--hogar-soft:#f0d8e2;--hogar-mid:#8a2a50;
+  --trabajo:#719176;--trabajo-soft:#e0ebe1;--trabajo-dark:#4a6a50;
+  --yo:#D65FA9;--yo-soft:#fae0f2;--yo-dark:#a03a7a;
+  --fondo:#faf6f0;--fondo2:#f2ece4;--texto:#2a1018;--texto2:#6a5060;--borde:#ddd0cc;
+}
+.app{width:100%;height:100%;max-width:430px;margin:0 auto;background:var(--fondo);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+.cover{background:linear-gradient(160deg,var(--hogar) 0%,#1a0010 100%);padding:48px 18px 14px;flex-shrink:0;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff;margin-top:32px}
+.cover-sub{font-size:11px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:2px}
+
+.inner-tabs{display:flex;background:#fff;border-bottom:1px solid var(--borde);overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.inner-tabs::-webkit-scrollbar{display:none}
+.itab{flex-shrink:0;padding:9px 16px;font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;white-space:nowrap}
+.itab.active{color:var(--hogar);border-bottom-color:var(--hogar);background:var(--hogar-soft)}
+
+.body{flex:1;overflow:hidden}
+.vista{display:none;height:100%;overflow-y:auto;padding:12px 12px 90px;-webkit-overflow-scrolling:touch}
+.vista.active{display:block}
+
+.sec-label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1.5px;text-transform:uppercase;margin:12px 0 7px}
+.sec-label:first-child{margin-top:0}
+
+/* OS CARD */
+.os-card{background:#fff;border:0.5px solid var(--borde);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.os-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.os-icono{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--hogar-soft)}
+.os-info{flex:1}
+.os-nombre{font-size:13px;font-weight:600;color:var(--texto)}
+.os-pacs{font-size:10px;color:var(--texto2);margin-top:2px}
+.os-badges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.os-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:5px}
+.badge-ok{background:#d6f0e8;color:#1a5a3a}
+.badge-pend{background:#fde8e8;color:#9a2a2a}
+.badge-proc{background:#fae8cc;color:#7a4010}
+.os-arrow{font-size:18px;color:var(--borde);transition:transform .2s}
+.os-arrow.open{transform:rotate(90deg)}
+
+.os-detalle{display:none;border-top:0.5px solid var(--fondo2)}
+.os-detalle.open{display:block}
+
+/* SUBTABS OS */
+.os-subtabs{display:flex;background:var(--fondo2);border-bottom:0.5px solid var(--borde)}
+.ostab{flex:1;padding:7px 4px;font-size:8px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.4px;text-align:center;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;transition:all .12s;white-space:nowrap}
+.ostab.active{color:var(--hogar);border-bottom-color:var(--hogar);background:#fff}
+
+.os-tab-body{padding:10px 12px}
+
+/* PACIENTES OS */
+.pac-os-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--fondo2)}
+.pac-os-row:last-child{border:none}
+.pac-os-dot{width:7px;height:7px;border-radius:50%;background:var(--trabajo);flex-shrink:0}
+.pac-os-nombre{flex:1;font-size:11px;color:var(--texto);font-weight:500}
+.pac-os-periodo{font-size:9px;color:var(--texto2)}
+.pac-os-estado{font-size:9px;font-weight:700}
+
+/* CHECKLIST DOCS */
+.check-item{display:flex;align-items:center;gap:8px;padding:7px 9px;background:var(--fondo2);border-radius:7px;margin-bottom:4px;cursor:pointer}
+.check-item input[type=checkbox]{accent-color:var(--hogar);width:15px;height:15px;flex-shrink:0}
+.check-item-label{flex:1;font-size:11px;color:var(--texto)}
+.check-item.done .check-item-label{text-decoration:line-through;color:var(--texto2)}
+
+/* CAMPOS */
+.campo{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.campo label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase}
+.campo input,.campo select,.campo textarea{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.campo input:focus,.campo select:focus{border-color:var(--hogar);background:#fff}
+.campo textarea{resize:vertical;min-height:60px;line-height:1.5}
+.crow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cfull{grid-column:1/-1}
+
+/* CREDENCIALES */
+.cred-item{display:flex;align-items:center;gap:8px;background:var(--fondo2);border-radius:8px;padding:9px 11px;margin-bottom:5px}
+.cred-label{font-size:9px;color:var(--texto2);min-width:80px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.cred-val{font-size:12px;color:var(--texto);font-weight:500;flex:1;font-family:monospace}
+.cred-eye{font-size:16px;color:var(--borde);cursor:pointer}
+
+/* DESCRIPCION FACTURACION */
+.desc-item{background:var(--fondo2);border-radius:9px;padding:10px 12px;margin-bottom:8px}
+.desc-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.desc-tipo{font-size:8px;font-weight:700;padding:2px 6px;border-radius:5px;text-transform:uppercase}
+.desc-codigo{font-size:9px;color:var(--texto2);flex:1}
+.desc-texto{font-size:11px;color:var(--texto);line-height:1.6;background:#fff;border:0.5px solid var(--borde);border-radius:6px;padding:8px 10px;margin-bottom:6px}
+.copiar-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--hogar);color:#fff;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;cursor:pointer}
+.copiar-btn.copiado{background:var(--trabajo-dark)}
+
+.btn{width:100%;padding:11px;background:var(--hogar);color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-out{width:100%;padding:9px;background:transparent;color:var(--texto2);border:0.5px solid var(--borde);border-radius:9px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:5px}
+.btn-del{width:100%;padding:9px;background:transparent;color:#b85a5a;border:0.5px solid #f0d0d0;border-radius:9px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:5px}
+.btn-add{display:flex;align-items:center;gap:6px;width:100%;padding:10px 12px;background:var(--trabajo-soft);border:0.5px dashed var(--trabajo);border-radius:9px;color:var(--trabajo-dark);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px}
+
+.fab{position:fixed;bottom:20px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--hogar);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(86,17,43,0.4);z-index:50}
+
+/* VISTA NUEVA OS */
+.vista-panel{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
+.vista-panel.open{display:flex}
+.vp-cover{background:linear-gradient(160deg,var(--hogar),#1a0010);padding:48px 16px 16px;flex-shrink:0;position:relative}
+.vp-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.vp-titulo{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;margin-top:32px}
+.vp-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+
+/* CHECK DOCS SELECTOR */
+.docs-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.doc-check-opt{display:flex;align-items:center;gap:7px;background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;color:var(--texto)}
+.doc-check-opt input[type=checkbox]{accent-color:var(--hogar);width:14px;height:14px}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--trabajo-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:30px;color:var(--texto2);font-size:11px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="cover">
+    <button class="cover-back" onclick="location.href='index.html'"><i class="ti ti-arrow-left"></i> Inicio</button>
+    <div class="cover-title">🏥 Obras Sociales</div>
+    <div class="cover-sub">Control y Facturación</div>
+  </div>
+
+  <div class="inner-tabs">
+    <button class="itab active" onclick="setTab('lista')">Mis obras sociales</button>
+    <button class="itab" onclick="setTab('control')">Control OS</button>
+    <button class="itab" onclick="setTab('descrip')">Descripciones</button>
+  </div>
+
+  <div class="body">
+
+    <!-- LISTA OS -->
+    <div class="vista active" id="tab-lista">
+      <div id="os-lista"><div class="empty">Cargando obras sociales...</div></div>
+      <button class="btn-add" onclick="abrirNuevaOS()"><i class="ti ti-plus"></i> Nueva obra social</button>
+    </div>
+
+    <!-- CONTROL OS (tabla por mes) -->
+    <div class="vista" id="tab-control">
+      <div class="sec-label">Estado general · <span id="mes-control">este mes</span></div>
+      <div id="control-lista"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- DESCRIPCIONES FACTURACIÓN -->
+    <div class="vista" id="tab-descrip">
+      <div style="background:#fef9f0;border:0.5px solid #e8d8b0;border-radius:9px;padding:9px 12px;margin-bottom:12px;display:flex;gap:8px">
+        <i class="ti ti-copy" style="color:#b8860b;font-size:15px;margin-top:1px;flex-shrink:0"></i>
+        <p style="font-size:10px;color:#6b5a2a;line-height:1.5">Textos pre-redactados por paciente. Tocá <strong>Copiar</strong> para pegar en tu sistema de facturación.</p>
+      </div>
+      <div id="descrip-lista"><div class="empty">Cargando descripciones...</div></div>
+      <button class="btn-add" onclick="abrirNuevaDescrip()"><i class="ti ti-plus"></i> Nueva descripción</button>
+    </div>
+
+  </div>
+
+  <button class="fab" onclick="abrirNuevaOS()">＋</button>
+
+  <!-- PANEL NUEVA OS -->
+  <div class="vista-panel" id="panel-nueva-os">
+    <div class="vp-cover">
+      <button class="vp-back" onclick="cerrarPanel('panel-nueva-os')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="vp-titulo" id="panel-os-titulo">Nueva obra social</div>
+    </div>
+    <div class="vp-body">
+      <input type="hidden" id="os-edit-id">
+      <div class="campo"><label>Nombre de la obra social *</label><input id="os-nombre" placeholder="Ej: IOMA, OSDE, PAMI..."></div>
+      <div class="crow">
+        <div class="campo"><label>CUIT</label><input id="os-cuit" placeholder="00-00000000-0"></div>
+        <div class="campo"><label>Condición IVA</label>
+          <select id="os-iva"><option>Monotributista</option><option>Responsable Inscripto</option><option>Exento</option></select>
+        </div>
+        <div class="campo cfull"><label>Domicilio</label><input id="os-dom" placeholder="Dirección de la obra social"></div>
+        <div class="campo"><label>Horario presupuesto</label><input id="os-horario" placeholder="Lun a Vie 9–14 hs"></div>
+        <div class="campo"><label>Teléfono</label><input type="tel" id="os-tel" placeholder="0800-000-0000"></div>
+      </div>
+
+      <div class="sec-label">Documentos que solicita</div>
+      <div class="docs-checks">
+        <div class="doc-check-opt"><input type="checkbox" id="doc-factura"> Factura</div>
+        <div class="doc-check-opt"><input type="checkbox" id="doc-asistencia"> Asistencia</div>
+        <div class="doc-check-opt"><input type="checkbox" id="doc-informe1"> Informe 1</div>
+        <div class="doc-check-opt"><input type="checkbox" id="doc-informe2"> Informe 2</div>
+        <div class="doc-check-opt"><input type="checkbox" id="doc-recibo"> Recibo</div>
+        <div class="doc-check-opt"><input type="checkbox" id="doc-planilla"> Planilla</div>
+      </div>
+
+      <div class="sec-label">Acceso al portal</div>
+      <div class="crow">
+        <div class="campo cfull"><label>Portal / URL</label><input id="os-portal" placeholder="www.portalprestadores.com"></div>
+        <div class="campo"><label>Correo electrónico</label><input type="email" id="os-mail" placeholder="correo@mail.com"></div>
+        <div class="campo"><label>Contraseña</label><input type="password" id="os-pass" placeholder="••••••••"></div>
+        <div class="campo cfull"><label>Observaciones</label><textarea id="os-obs" placeholder="Notas importantes sobre esta obra social..."></textarea></div>
+      </div>
+
+      <button class="btn" onclick="guardarOS()"><i class="ti ti-check"></i> Guardar obra social</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-nueva-os')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVA DESCRIPCIÓN -->
+  <div class="vista-panel" id="panel-nueva-descrip">
+    <div class="vp-cover">
+      <button class="vp-back" onclick="cerrarPanel('panel-nueva-descrip')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="vp-titulo">Nueva descripción</div>
+    </div>
+    <div class="vp-body">
+      <div class="campo">
+        <label>Paciente</label>
+        <select id="nd-pac"><option value="">Seleccioná un paciente...</option></select>
+      </div>
+      <div class="crow">
+        <div class="campo">
+          <label>Obra social</label>
+          <select id="nd-os"><option value="">Seleccioná OS...</option></select>
+        </div>
+        <div class="campo">
+          <label>Tipo de prestación</label>
+          <select id="nd-tipo">
+            <option value="Tratamiento">Tratamiento</option>
+            <option value="Evaluación">Evaluación</option>
+            <option value="Informe">Informe</option>
+            <option value="Reunión institucional">Reunión institucional</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="campo"><label>Código de nomenclador</label><input id="nd-codigo" placeholder="Ej: 01.03"></div>
+      </div>
+      <div class="campo"><label>Texto de la descripción</label><textarea id="nd-texto" placeholder="Escribí la descripción completa tal como la usás en la factura..." style="min-height:120px"></textarea></div>
+      <button class="btn" onclick="guardarDescrip()"><i class="ti ti-check"></i> Guardar descripción</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-nueva-descrip')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+  authDomain: "metanoia-caro.firebaseapp.com",
+  projectId: "metanoia-caro",
+  storageBucket: "metanoia-caro.firebasestorage.app",
+  messagingSenderId: "241874727",
+  appId: "1:241874727:web:ac149b414b517019631b02",
+  databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let obrasSociales = {};
+let pacientes = {};
+let descripciones = {};
+let cobros = {};
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const hoy = new Date();
+const mesActual = hoy.getMonth();
+const anioActual = hoy.getFullYear();
+const mesKey = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
+
+// CARGAR
+db.ref('obras_sociales').on('value', snap => { obrasSociales = snap.val() || {}; renderOS(); renderControl(); poblarSelectOS(); });
+db.ref('pacientes').on('value', snap => { pacientes = snap.val() || {}; renderControl(); poblarSelectPac(); renderDescripciones(); });
+db.ref('descripciones').on('value', snap => { descripciones = snap.val() || {}; renderDescripciones(); });
+db.ref('cobros').on('value', snap => { cobros = snap.val() || {}; renderControl(); });
+
+document.getElementById('mes-control').textContent = `${MESES[mesActual].toLowerCase()} ${anioActual}`;
+
+function poblarSelectPac() {
+  const sel = document.getElementById('nd-pac');
+  sel.innerHTML = '<option value="">Seleccioná un paciente...</option>';
+  Object.entries(pacientes).forEach(([id,p]) => sel.innerHTML += `<option value="${id}">${p.nombre||'Sin nombre'}</option>`);
+}
+
+function poblarSelectOS() {
+  const sel = document.getElementById('nd-os');
+  sel.innerHTML = '<option value="">Seleccioná OS...</option>';
+  Object.entries(obrasSociales).forEach(([id,os]) => sel.innerHTML += `<option value="${id}">${os.nombre||'Sin nombre'}</option>`);
+}
+
+// RENDER OS
+function renderOS() {
+  const lista = document.getElementById('os-lista');
+  if (!Object.keys(obrasSociales).length) {
+    lista.innerHTML = '<div class="empty">Todavía no tenés obras sociales cargadas.<br>Tocá el + para agregar la primera.</div>';
+    return;
+  }
+  lista.innerHTML = Object.entries(obrasSociales).map(([id,os]) => {
+    const pacsOS = Object.entries(pacientes).filter(([pid,p]) => p.os_nombre === os.nombre || p.os === os.nombre);
+    const pendientes = pacsOS.filter(([pid,p]) => !cobros[mesKey]?.[pid]?.pagado).length;
+    const badgeCls = pendientes === 0 ? 'badge-ok' : 'badge-pend';
+    const badgeTxt = pendientes === 0 ? '✓ Al día' : `${pendientes} pendiente${pendientes>1?'s':''}`;
+    const docs = os.docs || {};
+    const docsReq = Object.entries(docs).filter(([k,v])=>v).map(([k])=>k).join(', ');
+    return `<div class="os-card">
+      <div class="os-header" onclick="toggleOS('os-det-${id}','os-arr-${id}')">
+        <div class="os-icono">🏥</div>
+        <div class="os-info">
+          <div class="os-nombre">${os.nombre||'—'}</div>
+          <div class="os-pacs">${pacsOS.length} paciente${pacsOS.length!==1?'s':''} · ${MESES[mesActual]}</div>
+          <div class="os-badges"><span class="os-badge ${badgeCls}">${badgeTxt}</span></div>
+        </div>
+        <i class="ti ti-chevron-right os-arrow" id="os-arr-${id}"></i>
+      </div>
+      <div class="os-detalle" id="os-det-${id}">
+        <div class="os-subtabs">
+          <button class="ostab active" onclick="setOSTab('${id}','pacs')">Pacientes</button>
+          <button class="ostab" onclick="setOSTab('${id}','docs')">Documentos</button>
+          <button class="ostab" onclick="setOSTab('${id}','fact')">Facturación</button>
+          <button class="ostab" onclick="setOSTab('${id}','cred')">Credenciales</button>
+        </div>
+        <div class="os-tab-body">
+          <div id="ostab-${id}-pacs">
+            ${pacsOS.length ? pacsOS.map(([pid,p]) => {
+              const pag = cobros[mesKey]?.[pid]?.pagado;
+              return `<div class="pac-os-row"><div class="pac-os-dot" style="background:${p.colectivando?'var(--yo)':'var(--trabajo)'}"></div><div class="pac-os-nombre">${p.nombre||'—'}</div><div class="pac-os-periodo">${MESES[mesActual]}</div><div class="pac-os-estado" style="color:${pag?'var(--trabajo-dark)':'#b85a5a'}">${pag?'✓ Pagado':'⚠ Pendiente'}</div></div>`;
+            }).join('') : '<div class="empty">Sin pacientes con esta OS</div>'}
+          </div>
+          <div id="ostab-${id}-docs" style="display:none">
+            ${pacsOS.map(([pid,p]) => {
+              const docsOS = Object.entries(docs).filter(([k,v])=>v);
+              return docsOS.map(([dk]) => {
+                const hecho = cobros[mesKey]?.[pid]?.docs?.[dk] || false;
+                return `<div class="check-item ${hecho?'done':''}" onclick="toggleDoc('${mesKey}','${pid}','${dk}',${hecho})"><input type="checkbox" ${hecho?'checked':''}><span class="check-item-label">${dk.charAt(0).toUpperCase()+dk.slice(1)} — ${p.nombre||'—'}</span></div>`;
+              }).join('');
+            }).join('')}
+            ${!pacsOS.length ? '<div class="empty">Sin pacientes con esta OS</div>' : ''}
+          </div>
+          <div id="ostab-${id}-fact" style="display:none">
+            <div class="campo"><label>CUIT</label><input value="${os.cuit||''}" onchange="actualizarOS('${id}','cuit',this.value)" style="background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:7px 10px;font-size:12px;width:100%;font-family:'Inter',sans-serif;outline:none"></div>
+            <div class="campo"><label>Condición IVA</label><input value="${os.iva||''}" onchange="actualizarOS('${id}','iva',this.value)" style="background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:7px 10px;font-size:12px;width:100%;font-family:'Inter',sans-serif;outline:none"></div>
+            <div class="campo"><label>Domicilio</label><input value="${os.dom||''}" onchange="actualizarOS('${id}','dom',this.value)" style="background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:7px 10px;font-size:12px;width:100%;font-family:'Inter',sans-serif;outline:none"></div>
+            <div class="campo"><label>Horario presupuesto</label><input value="${os.horario||''}" onchange="actualizarOS('${id}','horario',this.value)" style="background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:7px 10px;font-size:12px;width:100%;font-family:'Inter',sans-serif;outline:none"></div>
+            <button class="btn" onclick="toast('✓ Datos guardados')"><i class="ti ti-check"></i> Guardar</button>
+            <button class="btn-del" onclick="eliminarOS('${id}')">Eliminar obra social</button>
+          </div>
+          <div id="ostab-${id}-cred" style="display:none">
+            <div class="cred-item"><span class="cred-label">Portal</span><span class="cred-val">${os.portal||'—'}</span></div>
+            <div class="cred-item"><span class="cred-label">Correo</span><span class="cred-val">${os.mail||'—'}</span></div>
+            <div class="cred-item"><span class="cred-label">Teléfono</span><span class="cred-val">${os.tel||'—'}</span></div>
+            <div class="cred-item">
+              <span class="cred-label">Contraseña</span>
+              <span class="cred-val" id="pass-${id}">••••••••</span>
+              <i class="ti ti-eye cred-eye" onclick="togglePass('${id}','${os.pass||''}')"></i>
+            </div>
+            <button class="btn" onclick="editarOS('${id}')"><i class="ti ti-pencil"></i> Editar credenciales</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// RENDER CONTROL
+function renderControl() {
+  const lista = document.getElementById('control-lista');
+  const osEntries = Object.entries(obrasSociales);
+  if (!osEntries.length) { lista.innerHTML = '<div class="empty">Sin obras sociales cargadas</div>'; return; }
+  lista.innerHTML = osEntries.map(([id,os]) => {
+    const pacsOS = Object.entries(pacientes).filter(([pid,p]) => p.os_nombre === os.nombre || p.os === os.nombre);
+    const docs = os.docs || {};
+    const docsReq = Object.entries(docs).filter(([k,v])=>v).map(([k])=>k);
+    return `<div style="background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--texto);margin-bottom:8px;display:flex;align-items:center;gap:7px">
+        <span>🏥</span>${os.nombre||'—'}
+        <span style="font-size:10px;color:var(--texto2);font-weight:500;margin-left:auto">${pacsOS.length} paciente${pacsOS.length!==1?'s':''}</span>
+      </div>
+      ${pacsOS.map(([pid,p]) => {
+        const pagado = cobros[mesKey]?.[pid]?.pagado || false;
+        const docsHechos = docsReq.filter(dk => cobros[mesKey]?.[pid]?.docs?.[dk]).length;
+        const pct = docsReq.length ? Math.round(docsHechos/docsReq.length*100) : 100;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--fondo2)">
+          <div style="font-size:11px;color:var(--texto);flex:1;font-weight:500">${p.nombre||'—'}</div>
+          <div style="font-size:9px;color:${pagado?'var(--trabajo-dark)':'#b85a5a'};font-weight:700">${pagado?'✓ Pagado':'⚠ Pend.'}</div>
+          <div style="font-size:9px;color:var(--texto2)">${docsHechos}/${docsReq.length} docs</div>
+        </div>`;
+      }).join('')}
+      ${!pacsOS.length ? '<div style="font-size:11px;color:var(--texto2);text-align:center;padding:8px">Sin pacientes con esta OS</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+// RENDER DESCRIPCIONES
+function renderDescripciones() {
+  const lista = document.getElementById('descrip-lista');
+  const pacEntries = Object.entries(pacientes);
+  if (!pacEntries.length) { lista.innerHTML = '<div class="empty">Primero cargá pacientes para agregar descripciones.</div>'; return; }
+
+  const porPac = {};
+  Object.entries(descripciones).forEach(([id,d]) => {
+    if (!porPac[d.pac_id]) porPac[d.pac_id] = [];
+    porPac[d.pac_id].push([id,d]);
+  });
+
+  lista.innerHTML = pacEntries.map(([pid,p]) => {
+    const descs = porPac[pid] || [];
+    const ini = (p.nombre||'?').split(',').map(s=>s.trim()[0]||'?').slice(0,2).join('').toUpperCase();
+    return `<div style="background:#fff;border:0.5px solid var(--borde);border-radius:12px;margin-bottom:10px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:0.5px solid var(--fondo2)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--hogar);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${ini}</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--texto)">${p.nombre||'—'}</div><div style="font-size:9px;color:var(--texto2)">${descs.length} descripción${descs.length!==1?'es':''}</div></div>
+        <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--hogar-soft);color:var(--hogar)">${p.os_nombre||'Particular'}</span>
+      </div>
+      <div style="padding:10px 13px">
+        ${descs.length ? descs.map(([did,d]) => `
+          <div class="desc-item">
+            <div class="desc-header">
+              <span class="desc-tipo" style="background:var(--hogar-soft);color:var(--hogar)">${d.tipo||'Prestación'}</span>
+              <span class="desc-codigo">${d.codigo ? 'Código: '+d.codigo : ''}</span>
+              <button style="background:none;border:none;color:#b85a5a;font-size:14px;cursor:pointer" onclick="eliminarDescrip('${did}')"><i class="ti ti-trash"></i></button>
+            </div>
+            <div class="desc-texto">${d.texto||''}</div>
+            <button class="copiar-btn" id="cbtn-${did}" onclick="copiarTexto('${did}','${(d.texto||'').replace(/'/g,"\\'")}')">
+              <i class="ti ti-copy"></i> Copiar texto
+            </button>
+          </div>`).join('') : '<div style="font-size:11px;color:var(--texto2);text-align:center;padding:10px">Sin descripciones aún</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ACCIONES
+function toggleOS(detId, arrId) {
+  document.getElementById(detId).classList.toggle('open');
+  document.getElementById(arrId).classList.toggle('open');
+}
+
+function setOSTab(osId, tab) {
+  ['pacs','docs','fact','cred'].forEach(t => {
+    const el = document.getElementById(`ostab-${osId}-${t}`);
+    if (el) el.style.display = t===tab ? 'block' : 'none';
+  });
+  const det = document.getElementById(`os-det-${osId}`);
+  if (det) det.querySelectorAll('.ostab').forEach((b,i) => {
+    b.classList.toggle('active', ['pacs','docs','fact','cred'][i]===tab);
+  });
+}
+
+function togglePass(id, real) {
+  const el = document.getElementById('pass-'+id);
+  if (!el) return;
+  el.textContent = el.textContent === '••••••••' ? (real||'Sin contraseña') : '••••••••';
+}
+
+async function toggleDoc(mesKey, pacId, doc, actual) {
+  await db.ref(`cobros/${mesKey}/${pacId}/docs/${doc}`).set(!actual);
+  toast(!actual ? '✓ Documento entregado' : 'Marcado como pendiente');
+}
+
+async function actualizarOS(id, campo, val) {
+  await db.ref(`obras_sociales/${id}/${campo}`).set(val);
+}
+
+async function eliminarOS(id) {
+  if (!confirm('¿Eliminar esta obra social?')) return;
+  await db.ref('obras_sociales/'+id).remove();
+  toast('Obra social eliminada');
+}
+
+function editarOS(id) {
+  const os = obrasSociales[id];
+  if (!os) return;
+  document.getElementById('os-edit-id').value = id;
+  document.getElementById('os-nombre').value = os.nombre||'';
+  document.getElementById('os-cuit').value = os.cuit||'';
+  document.getElementById('os-dom').value = os.dom||'';
+  document.getElementById('os-horario').value = os.horario||'';
+  document.getElementById('os-tel').value = os.tel||'';
+  document.getElementById('os-portal').value = os.portal||'';
+  document.getElementById('os-mail').value = os.mail||'';
+  document.getElementById('os-pass').value = os.pass||'';
+  document.getElementById('os-obs').value = os.obs||'';
+  const docs = os.docs || {};
+  ['factura','asistencia','informe1','informe2','recibo','planilla'].forEach(d => {
+    const el = document.getElementById('doc-'+d);
+    if (el) el.checked = docs[d] || false;
+  });
+  document.getElementById('panel-os-titulo').textContent = 'Editar: ' + os.nombre;
+  document.getElementById('panel-nueva-os').classList.add('open');
+}
+
+function abrirNuevaOS() {
+  document.getElementById('os-edit-id').value = '';
+  document.getElementById('panel-os-titulo').textContent = 'Nueva obra social';
+  ['os-nombre','os-cuit','os-dom','os-horario','os-tel','os-portal','os-mail','os-pass','os-obs'].forEach(id => document.getElementById(id).value='');
+  ['factura','asistencia','informe1','informe2','recibo','planilla'].forEach(d => { const el=document.getElementById('doc-'+d); if(el) el.checked=false; });
+  document.getElementById('panel-nueva-os').classList.add('open');
+}
+
+async function guardarOS() {
+  const nombre = document.getElementById('os-nombre').value.trim();
+  if (!nombre) { toast('⚠ Ingresá el nombre de la obra social'); return; }
+  const editId = document.getElementById('os-edit-id').value;
+  const docs = {};
+  ['factura','asistencia','informe1','informe2','recibo','planilla'].forEach(d => {
+    docs[d] = document.getElementById('doc-'+d).checked;
+  });
+  const data = {
+    nombre, cuit: document.getElementById('os-cuit').value,
+    iva: document.getElementById('os-iva').value,
+    dom: document.getElementById('os-dom').value,
+    horario: document.getElementById('os-horario').value,
+    tel: document.getElementById('os-tel').value,
+    portal: document.getElementById('os-portal').value,
+    mail: document.getElementById('os-mail').value,
+    pass: document.getElementById('os-pass').value,
+    obs: document.getElementById('os-obs').value,
+    docs, creado: Date.now()
+  };
+  if (editId) await db.ref('obras_sociales/'+editId).update(data);
+  else await db.ref('obras_sociales').push(data);
+  cerrarPanel('panel-nueva-os');
+  toast('✓ Obra social guardada');
+}
+
+function abrirNuevaDescrip() { document.getElementById('panel-nueva-descrip').classList.add('open'); }
+
+async function guardarDescrip() {
+  const pacId = document.getElementById('nd-pac').value;
+  const texto = document.getElementById('nd-texto').value.trim();
+  if (!pacId || !texto) { toast('⚠ Seleccioná paciente y escribí el texto'); return; }
+  const desc = {
+    pac_id: pacId,
+    pac_nombre: pacientes[pacId]?.nombre || '—',
+    os_id: document.getElementById('nd-os').value,
+    tipo: document.getElementById('nd-tipo').value,
+    codigo: document.getElementById('nd-codigo').value,
+    texto, creado: Date.now()
+  };
+  await db.ref('descripciones').push(desc);
+  cerrarPanel('panel-nueva-descrip');
+  toast('✓ Descripción guardada');
+  document.getElementById('nd-texto').value='';
+  document.getElementById('nd-codigo').value='';
+}
+
+async function eliminarDescrip(id) {
+  if (!confirm('¿Eliminar esta descripción?')) return;
+  await db.ref('descripciones/'+id).remove();
+  toast('Descripción eliminada');
+}
+
+function copiarTexto(id, texto) {
+  if (navigator.clipboard) navigator.clipboard.writeText(texto).catch(()=>{});
+  const btn = document.getElementById('cbtn-'+id);
+  if (btn) {
+    btn.classList.add('copiado');
+    btn.innerHTML = '<i class="ti ti-check"></i> ¡Copiado!';
+    setTimeout(() => { btn.classList.remove('copiado'); btn.innerHTML = '<i class="ti ti-copy"></i> Copiar texto'; }, 2500);
+  }
+  toast('✓ Texto copiado al portapapeles');
+}
+
+function cerrarPanel(id) { document.getElementById(id).classList.remove('open'); }
+function setTab(t) {
+  ['lista','control','descrip'].forEach(x => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.querySelectorAll('.itab')[['lista','control','descrip'].indexOf(x)].classList.toggle('active', x===t);
+  });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
