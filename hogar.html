@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#56112B">
+<title>Hogar — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+:root{
+  --hogar:#56112B;--hogar-soft:#f0d8e2;--hogar-mid:#8a2a50;
+  --trabajo:#719176;--trabajo-soft:#e0ebe1;--trabajo-dark:#4a6a50;
+  --yo:#D65FA9;--yo-soft:#fae0f2;--yo-dark:#a03a7a;
+  --fondo:#faf6f0;--fondo2:#f2ece4;--texto:#2a1018;--texto2:#6a5060;--borde:#ddd0cc;
+}
+.app{width:100%;height:100%;max-width:430px;margin:0 auto;background:var(--fondo);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+.cover{background:linear-gradient(160deg,var(--hogar) 0%,#1a0010 100%);padding:48px 18px 14px;flex-shrink:0;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff;margin-top:32px}
+.cover-sub{font-size:11px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:2px}
+
+.inner-tabs{display:flex;background:#fff;border-bottom:1px solid var(--borde);flex-shrink:0}
+.itab{flex:1;padding:9px 4px 8px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;transition:all .15s}
+.itab-icon{font-size:18px;margin-bottom:2px}
+.itab-label{font-size:8px;font-weight:700;color:#7a6a70;text-transform:uppercase;letter-spacing:0.5px}
+.itab.active{border-bottom:3px solid var(--hogar);background:var(--hogar-soft)}
+.itab.active .itab-label{color:var(--hogar)}
+
+.body{flex:1;overflow:hidden}
+.vista{display:none;height:100%;overflow-y:auto;padding:12px 12px 90px;-webkit-overflow-scrolling:touch}
+.vista.active{display:block}
+
+.sec-label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1.5px;text-transform:uppercase;margin:12px 0 7px}
+.sec-label:first-child{margin-top:0}
+
+/* COMPRAS */
+.receta-strip{background:#fae8cc;border-radius:8px;padding:8px 11px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.receta-strip span{font-size:10px;color:#6b5a2a;flex:1}
+.receta-strip button{font-size:9px;background:#a06020;color:#fff;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
+
+.cat-block{margin-bottom:12px}
+.cat-header{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.cat-icon{font-size:18px}
+.cat-nombre{font-size:12px;font-weight:700;color:var(--texto);flex:1}
+.cat-count{font-size:9px;color:var(--texto2)}
+.cat-add{background:none;border:none;color:var(--hogar);font-size:20px;cursor:pointer;padding:0 4px}
+.cat-edit{background:none;border:none;color:var(--texto2);font-size:14px;cursor:pointer}
+
+.item-compra{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:8px;margin-bottom:4px;border:0.5px solid var(--borde)}
+.item-compra input[type=checkbox]{accent-color:var(--hogar);width:15px;height:15px;flex-shrink:0}
+.item-nombre{flex:1;font-size:11px;color:var(--texto)}
+.item-compra.done .item-nombre{text-decoration:line-through;color:#b0a0a8}
+.item-cant{font-size:10px;color:var(--texto2)}
+.item-origen{font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700}
+.or-receta{background:#fae8cc;color:#7a4010}
+.or-manual{background:var(--fondo2);color:var(--texto2)}
+.item-del{background:none;border:none;color:#ddd;font-size:14px;cursor:pointer}
+
+.add-item-row{display:flex;gap:6px;margin-top:4px}
+.add-item-input{flex:1;background:var(--fondo2);border:0.5px dashed var(--borde);border-radius:7px;padding:7px 10px;font-size:11px;font-family:'Inter',sans-serif;outline:none;color:var(--texto)}
+.add-item-input:focus{border-color:var(--hogar);background:#fff}
+.add-item-cant{width:60px;background:var(--fondo2);border:0.5px dashed var(--borde);border-radius:7px;padding:7px 8px;font-size:11px;font-family:'Inter',sans-serif;outline:none;color:var(--texto)}
+.add-item-btn{background:var(--hogar);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:14px;cursor:pointer}
+
+.add-cat-btn{display:flex;align-items:center;gap:6px;width:100%;padding:9px 12px;background:var(--hogar-soft);border:0.5px dashed var(--hogar);border-radius:9px;color:var(--hogar);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* PENDIENTES */
+.pend-card{background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:11px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start}
+.pend-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--hogar);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;color:transparent;transition:all .15s}
+.pend-check.done{background:var(--hogar);color:#fff;border-color:var(--hogar)}
+.pend-prio{font-size:7px;font-weight:700;padding:2px 5px;border-radius:4px;text-transform:uppercase;margin-top:4px}
+.prio-alta{background:#fde8e8;color:#9a2a2a}
+.prio-media{background:#fae8cc;color:#7a4010}
+.prio-baja{background:#d6f0e8;color:#1a5a3a}
+.pend-info{flex:1}
+.pend-titulo{font-size:12px;font-weight:500;color:var(--texto)}
+.pend-titulo.done{text-decoration:line-through;color:#b0a0a8}
+.pend-fecha{font-size:9px;color:var(--texto2);margin-top:2px}
+.pend-area{font-size:8px;font-weight:700;padding:2px 6px;border-radius:5px;margin-top:4px;display:inline-block}
+
+/* LIMPIEZA */
+.semana-nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border:0.5px solid var(--borde);border-radius:9px;padding:8px 12px;margin-bottom:10px}
+.sem-arrow{background:none;border:none;color:var(--texto2);font-size:18px;cursor:pointer}
+.sem-label{font-size:12px;font-weight:600;color:var(--texto)}
+.prog-wrap{background:var(--hogar-soft);border-radius:9px;padding:10px 12px;margin-bottom:10px}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.prog-label{font-size:10px;font-weight:700;color:var(--texto)}
+.prog-num{font-size:13px;font-weight:700;color:var(--hogar)}
+.prog-bar{height:6px;background:rgba(86,17,43,0.2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--hogar),var(--hogar-mid));border-radius:3px;transition:width .3s}
+.zona-titulo{font-size:10px;font-weight:700;color:var(--texto);text-transform:uppercase;letter-spacing:0.8px;margin:10px 0 5px;display:flex;align-items:center;gap:5px}
+.limp-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border-radius:8px;margin-bottom:3px;border:0.5px solid var(--borde)}
+.limp-item input[type=checkbox]{accent-color:var(--hogar);width:14px;height:14px}
+.limp-nombre{flex:1;font-size:11px;color:var(--texto)}
+.limp-item.done .limp-nombre{text-decoration:line-through;color:#b0a0a8}
+.limp-frec{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px}
+.frec-d{background:var(--hogar-soft);color:var(--hogar)}
+.frec-s{background:#d6f0e8;color:#1a5a3a}
+.frec-m{background:#ddeaf5;color:#2a5a98}
+
+/* MENÚ */
+.menu-dias{display:flex;overflow-x:auto;gap:6px;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
+.menu-dias::-webkit-scrollbar{display:none}
+.dia-btn{flex-shrink:0;padding:7px 10px;border-radius:9px;border:0.5px solid var(--borde);background:#fff;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:var(--texto2);cursor:pointer;text-align:center;min-width:54px;transition:all .12s}
+.dia-btn.hoy{border-color:var(--hogar);background:var(--hogar-soft);color:var(--hogar)}
+.dia-btn .dn{font-size:15px;font-weight:700;display:block}
+.comida-slot{background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:11px 12px;margin-bottom:6px}
+.slot-header{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.slot-tipo{font-size:10px;font-weight:700;color:var(--texto);text-transform:uppercase;letter-spacing:0.5px;flex:1}
+.slot-desde{font-size:8px;font-weight:700;padding:2px 6px;border-radius:5px;background:#fae8cc;color:#7a4010}
+.slot-receta{font-size:12px;font-weight:500;color:var(--texto)}
+.slot-desc{font-size:10px;color:var(--texto2);margin-top:2px}
+.slot-vacio{font-size:11px;color:var(--hogar);font-style:italic;cursor:pointer;font-weight:500}
+.lista-compras-btn{width:100%;padding:10px;background:var(--hogar);color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* CAMPOS */
+.campo{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.campo label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase}
+.campo input,.campo select,.campo textarea{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.campo input:focus,.campo select:focus{border-color:var(--hogar);background:#fff}
+.crow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.cfull{grid-column:1/-1}
+
+.btn{width:100%;padding:11px;background:var(--hogar);color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-out{width:100%;padding:9px;background:transparent;color:var(--texto2);border:0.5px solid var(--borde);border-radius:9px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:5px}
+
+.fab{position:fixed;bottom:20px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--hogar);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(86,17,43,0.4);z-index:50}
+
+.panel{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
+.panel.open{display:flex}
+.panel-cover{background:linear-gradient(160deg,var(--hogar),#1a0010);padding:48px 16px 16px;flex-shrink:0;position:relative}
+.panel-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.panel-titulo{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#fff;margin-top:32px}
+.panel-body{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--trabajo-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:30px;color:var(--texto2);font-size:11px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="cover">
+    <button class="cover-back" onclick="location.href='index.html'"><i class="ti ti-arrow-left"></i> Inicio</button>
+    <div class="cover-title">🏡 Hogar</div>
+    <div class="cover-sub">Tu casa, organizada</div>
+  </div>
+
+  <div class="inner-tabs">
+    <button class="itab active" onclick="setTab('compras')"><div class="itab-icon">🛒</div><div class="itab-label">Compras</div></button>
+    <button class="itab" onclick="setTab('pendientes')"><div class="itab-icon">📋</div><div class="itab-label">Pendientes</div></button>
+    <button class="itab" onclick="setTab('limpieza')"><div class="itab-icon">🧹</div><div class="itab-label">Limpieza</div></button>
+    <button class="itab" onclick="setTab('menu')"><div class="itab-icon">🍽️</div><div class="itab-label">Menú</div></button>
+  </div>
+
+  <div class="body">
+
+    <!-- COMPRAS -->
+    <div class="vista active" id="tab-compras">
+      <div class="receta-strip">
+        <span>🍳 Los ingredientes del menú semanal se agregan automáticamente</span>
+        <button onclick="generarDesdeMenu()">Generar</button>
+      </div>
+      <div id="compras-lista"><div class="empty">Cargando lista de compras...</div></div>
+      <button class="add-cat-btn" onclick="abrirNuevaCat()"><i class="ti ti-plus"></i> Nueva categoría</button>
+    </div>
+
+    <!-- PENDIENTES -->
+    <div class="vista" id="tab-pendientes">
+      <div class="sec-label">Para hoy</div>
+      <div id="pend-hoy"><div class="empty">Sin tareas urgentes 🎉</div></div>
+      <div class="sec-label">Esta semana</div>
+      <div id="pend-semana"><div class="empty">Sin tareas esta semana</div></div>
+      <div class="sec-label">Sin fecha</div>
+      <div id="pend-sinfecha"><div class="empty">Sin tareas pendientes</div></div>
+      <button class="btn" onclick="abrirNuevaTarea()" style="margin-top:8px"><i class="ti ti-plus"></i> Nueva tarea</button>
+    </div>
+
+    <!-- LIMPIEZA -->
+    <div class="vista" id="tab-limpieza">
+      <div class="semana-nav">
+        <button class="sem-arrow">‹</button>
+        <span class="sem-label" id="sem-label">Cargando...</span>
+        <button class="sem-arrow">›</button>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header">
+          <span class="prog-label">Progreso semanal</span>
+          <span class="prog-num" id="prog-num">0 / 0 tareas</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <div id="limpieza-zonas"><div class="empty">Cargando checklist...</div></div>
+      <button class="btn" onclick="abrirNuevaZona()" style="margin-top:8px"><i class="ti ti-plus"></i> Agregar zona / tarea</button>
+    </div>
+
+    <!-- MENÚ -->
+    <div class="vista" id="tab-menu">
+      <div class="menu-dias" id="menu-dias"></div>
+      <div class="sec-label" id="menu-dia-label">Hoy</div>
+      <div id="menu-slots"></div>
+      <button class="lista-compras-btn" onclick="generarDesdeMenu()">
+        🛒 Agregar ingredientes a la lista de compras
+      </button>
+    </div>
+
+  </div>
+
+  <button class="fab" id="fab-btn" onclick="fabAccion()">＋</button>
+
+  <!-- PANEL NUEVA CAT -->
+  <div class="panel" id="panel-cat">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-cat')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Nueva categoría</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>Nombre de la categoría</label><input id="cat-nombre" placeholder="Ej: Verduras, Lácteos, Limpieza..."></div>
+      <div class="campo"><label>Ícono</label>
+        <select id="cat-icono">
+          <option value="🥦">🥦 Verduras y frutas</option><option value="🥛">🥛 Lácteos</option>
+          <option value="🥩">🥩 Carnes</option><option value="🍞">🍞 Panadería</option>
+          <option value="🧴">🧴 Limpieza</option><option value="🛁">🛁 Higiene</option>
+          <option value="🧂">🧂 Almacén</option><option value="🐟">🐟 Pescados</option>
+          <option value="🧊">🧊 Congelados</option><option value="🍷">🍷 Bebidas</option>
+          <option value="🌿">🌿 Otros</option>
+        </select>
+      </div>
+      <button class="btn" onclick="guardarCategoria()"><i class="ti ti-check"></i> Crear categoría</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-cat')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVA TAREA -->
+  <div class="panel" id="panel-tarea">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-tarea')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Nueva tarea</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>Tarea *</label><input id="tarea-titulo" placeholder="¿Qué hay que hacer?"></div>
+      <div class="crow">
+        <div class="campo"><label>Prioridad</label>
+          <select id="tarea-prio"><option value="alta">Alta</option><option value="media" selected>Media</option><option value="baja">Baja</option></select>
+        </div>
+        <div class="campo"><label>Fecha límite</label><input type="date" id="tarea-fecha"></div>
+        <div class="campo cfull"><label>Área</label>
+          <select id="tarea-area">
+            <option value="Reparaciones">🔧 Reparaciones</option><option value="Pagos">💳 Pagos</option>
+            <option value="Cocina">🍳 Cocina</option><option value="Organización">📦 Organización</option>
+            <option value="Compras">🛒 Compras</option><option value="Otro">📌 Otro</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="guardarTarea()"><i class="ti ti-check"></i> Guardar tarea</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-tarea')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVA ZONA LIMPIEZA -->
+  <div class="panel" id="panel-zona">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-zona')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Nueva tarea de limpieza</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>Zona</label>
+        <select id="zona-nombre">
+          <option value="Cocina">🍳 Cocina</option><option value="Baño">🛁 Baño</option>
+          <option value="Living">🛋️ Living</option><option value="Dormitorio">🛏️ Dormitorio</option>
+          <option value="Lavadero">👕 Lavadero</option><option value="General">🏠 General</option>
+        </select>
+      </div>
+      <div class="campo"><label>Tarea *</label><input id="zona-tarea" placeholder="Ej: Limpiar mesada, Aspirar..."></div>
+      <div class="campo"><label>Frecuencia</label>
+        <select id="zona-frec"><option value="diaria">Diaria</option><option value="semanal" selected>Semanal</option><option value="mensual">Mensual</option></select>
+      </div>
+      <button class="btn" onclick="guardarTareaLimpieza()"><i class="ti ti-check"></i> Guardar tarea</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-zona')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVO ITEM MENÚ -->
+  <div class="panel" id="panel-menu">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-menu')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo" id="menu-panel-titulo">Agregar al menú</div>
+    </div>
+    <div class="panel-body">
+      <input type="hidden" id="menu-slot-key">
+      <div class="campo"><label>Comida / Receta</label><input id="menu-receta" placeholder="Ej: Tarta de espinaca..."></div>
+      <div class="campo"><label>Descripción / Ingredientes principales</label><input id="menu-desc" placeholder="Ej: Con ensalada verde"></div>
+      <div class="campo"><label>Ingredientes para la lista de compras</label>
+        <textarea id="menu-ingredientes" placeholder="Uno por línea:&#10;Tomates 1 kg&#10;Espinaca 1 atado&#10;Ricota 500 g" style="min-height:100px;line-height:1.6"></textarea>
+      </div>
+      <button class="btn" onclick="guardarMenu()"><i class="ti ti-check"></i> Guardar</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-menu')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+  authDomain: "metanoia-caro.firebaseapp.com",
+  projectId: "metanoia-caro",
+  storageBucket: "metanoia-caro.firebasestorage.app",
+  messagingSenderId: "241874727",
+  appId: "1:241874727:web:ac149b414b517019631b02",
+  databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let categorias = {};
+let compras = {};
+let tareas = {};
+let limpieza = {};
+let menu = {};
+let tabActual = 'compras';
+let diaMenuActual = 0;
+let menuSlotActual = '';
+
+const DIAS_S = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const COMIDAS = [{key:'desayuno',icon:'🌅',label:'Desayuno'},{key:'almuerzo',icon:'☀️',label:'Almuerzo'},{key:'merienda',icon:'🍵',label:'Merienda'},{key:'cena',icon:'🌙',label:'Cena'}];
+const hoy = new Date();
+
+// CARGAR
+db.ref('hogar/categorias').on('value', s => { categorias = s.val()||{}; renderCompras(); });
+db.ref('hogar/compras').on('value', s => { compras = s.val()||{}; renderCompras(); });
+db.ref('hogar/tareas').on('value', s => { tareas = s.val()||{}; renderPendientes(); });
+db.ref('hogar/limpieza').on('value', s => { limpieza = s.val()||{}; renderLimpieza(); });
+db.ref('hogar/menu').on('value', s => { menu = s.val()||{}; renderMenuDias(); });
+
+// SEMANA LIMPIEZA
+const lunes = new Date(hoy);
+lunes.setDate(hoy.getDate() - (hoy.getDay()===0?6:hoy.getDay()-1));
+const viernes = new Date(lunes); viernes.setDate(lunes.getDate()+4);
+document.getElementById('sem-label').textContent = `${lunes.getDate()} al ${viernes.getDate()} de ${MESES[lunes.getMonth()]}`;
+
+// TABS
+function setTab(t) {
+  tabActual = t;
+  ['compras','pendientes','limpieza','menu'].forEach((x,i) => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.querySelectorAll('.itab')[i].classList.toggle('active', x===t);
+  });
+}
+
+// ===== COMPRAS =====
+function renderCompras() {
+  const lista = document.getElementById('compras-lista');
+  if (!Object.keys(categorias).length) {
+    lista.innerHTML = `<div class="empty">Todavía no tenés categorías.<br>Tocá "Nueva categoría" para empezar.</div>`;
+    return;
+  }
+  lista.innerHTML = Object.entries(categorias).map(([catId,cat]) => {
+    const itemsCat = Object.entries(compras).filter(([id,c]) => c.cat_id === catId);
+    const pending = itemsCat.filter(([id,c]) => !c.done).length;
+    return `<div class="cat-block">
+      <div class="cat-header">
+        <span class="cat-icon">${cat.icono||'🌿'}</span>
+        <span class="cat-nombre">${cat.nombre||'—'}</span>
+        <span class="cat-count">${pending} items</span>
+        <button class="cat-add" onclick="mostrarAddItem('add-${catId}')">+</button>
+      </div>
+      ${itemsCat.map(([id,c]) => `
+        <div class="item-compra ${c.done?'done':''}" id="ic-${id}">
+          <input type="checkbox" ${c.done?'checked':''} onchange="toggleItem('${id}',${!c.done})">
+          <span class="item-nombre">${c.nombre||'—'}</span>
+          <span class="item-cant">${c.cantidad||''}</span>
+          <span class="item-origen ${c.desde_receta?'or-receta':'or-manual'}">${c.desde_receta?'Receta':'Manual'}</span>
+          <button class="item-del" onclick="eliminarItem('${id}')"><i class="ti ti-x"></i></button>
+        </div>`).join('')}
+      <div class="add-item-row" id="add-${catId}" style="display:none">
+        <input class="add-item-input" type="text" placeholder="Agregar item..." id="inp-${catId}">
+        <input class="add-item-cant" type="text" placeholder="Cant." id="cant-${catId}">
+        <button class="add-item-btn" onclick="agregarItem('${catId}')">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function mostrarAddItem(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display==='none' ? 'flex' : 'none';
+  if (el.style.display==='flex') el.querySelector('input').focus();
+}
+
+async function agregarItem(catId) {
+  const nom = document.getElementById('inp-'+catId).value.trim();
+  if (!nom) return;
+  const cant = document.getElementById('cant-'+catId).value;
+  await db.ref('hogar/compras').push({ cat_id: catId, nombre: nom, cantidad: cant, done: false, desde_receta: false, creado: Date.now() });
+  document.getElementById('inp-'+catId).value = '';
+  document.getElementById('cant-'+catId).value = '';
+  toast('✓ Item agregado');
+}
+
+async function toggleItem(id, val) {
+  await db.ref('hogar/compras/'+id+'/done').set(val);
+}
+
+async function eliminarItem(id) {
+  await db.ref('hogar/compras/'+id).remove();
+}
+
+function abrirNuevaCat() { document.getElementById('panel-cat').classList.add('open'); }
+
+async function guardarCategoria() {
+  const nom = document.getElementById('cat-nombre').value.trim();
+  if (!nom) { toast('⚠ Ingresá el nombre'); return; }
+  await db.ref('hogar/categorias').push({ nombre: nom, icono: document.getElementById('cat-icono').value, creado: Date.now() });
+  cerrarPanel('panel-cat');
+  document.getElementById('cat-nombre').value = '';
+  toast('✓ Categoría creada');
+}
+
+// ===== PENDIENTES =====
+function renderPendientes() {
+  const hoyStr = hoy.toISOString().split('T')[0];
+  const fin = new Date(hoy); fin.setDate(hoy.getDate()+7);
+  const finStr = fin.toISOString().split('T')[0];
+
+  const all = Object.entries(tareas).filter(([id,t]) => !t.hecho);
+  const parHoy = all.filter(([id,t]) => t.fecha && t.fecha <= hoyStr);
+  const semana = all.filter(([id,t]) => t.fecha && t.fecha > hoyStr && t.fecha <= finStr);
+  const sinFecha = all.filter(([id,t]) => !t.fecha);
+
+  renderGrupoTareas('pend-hoy', parHoy, 'Sin tareas urgentes 🎉');
+  renderGrupoTareas('pend-semana', semana, 'Sin tareas esta semana');
+  renderGrupoTareas('pend-sinfecha', sinFecha, 'Sin tareas pendientes');
+}
+
+function renderGrupoTareas(elId, lista, empty) {
+  const el = document.getElementById(elId);
+  if (!lista.length) { el.innerHTML = `<div class="empty">${empty}</div>`; return; }
+  const prios = { alta:'prio-alta', media:'prio-media', baja:'prio-baja' };
+  const areas = { Reparaciones:'#fde8e8,#9a2a2a', Pagos:'#fae8cc,#7a4010', Cocina:'#d6f0e8,#1a5a3a', Organización:'var(--yo-soft),var(--yo-dark)', Compras:'var(--hogar-soft),var(--hogar)', Otro:'var(--fondo2),var(--texto2)' };
+  el.innerHTML = lista.map(([id,t]) => {
+    const [bg,color] = (areas[t.area]||'var(--fondo2),var(--texto2)').split(',');
+    return `<div class="pend-card">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="pend-check ${t.hecho?'done':''}" onclick="toggleTarea('${id}',${!t.hecho})">${t.hecho?'✓':''}</div>
+        <div class="pend-prio ${prios[t.prioridad]||'prio-media'}">${t.prioridad||'media'}</div>
+      </div>
+      <div class="pend-info">
+        <div class="pend-titulo ${t.hecho?'done':''}">${t.titulo||'—'}</div>
+        <div class="pend-fecha">${t.fecha ? '📅 Vence '+t.fecha : '📅 Sin fecha'}</div>
+        <div class="pend-area" style="background:${bg};color:${color}">${t.area||'Otro'}</div>
+      </div>
+      <button style="background:none;border:none;color:#ddd;font-size:16px;cursor:pointer" onclick="eliminarTarea('${id}')"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+
+async function toggleTarea(id, val) {
+  await db.ref('hogar/tareas/'+id+'/hecho').set(val);
+}
+async function eliminarTarea(id) {
+  await db.ref('hogar/tareas/'+id).remove();
+}
+
+function abrirNuevaTarea() { document.getElementById('panel-tarea').classList.add('open'); }
+
+async function guardarTarea() {
+  const titulo = document.getElementById('tarea-titulo').value.trim();
+  if (!titulo) { toast('⚠ Escribí la tarea'); return; }
+  await db.ref('hogar/tareas').push({
+    titulo, prioridad: document.getElementById('tarea-prio').value,
+    fecha: document.getElementById('tarea-fecha').value,
+    area: document.getElementById('tarea-area').value,
+    hecho: false, creado: Date.now()
+  });
+  cerrarPanel('panel-tarea');
+  document.getElementById('tarea-titulo').value = '';
+  toast('✓ Tarea guardada');
+}
+
+// ===== LIMPIEZA =====
+function renderLimpieza() {
+  const el = document.getElementById('limpieza-zonas');
+  if (!Object.keys(limpieza).length) {
+    el.innerHTML = '<div class="empty">Agregá zonas y tareas de limpieza tocando el botón de abajo.</div>';
+    document.getElementById('prog-num').textContent = '0 / 0 tareas';
+    return;
+  }
+  const zonas = {};
+  Object.entries(limpieza).forEach(([id,t]) => {
+    if (!zonas[t.zona]) zonas[t.zona] = [];
+    zonas[t.zona].push([id,t]);
+  });
+  let total = 0, hechos = 0;
+  const frecs = { diaria:'frec-d', semanal:'frec-s', mensual:'frec-m' };
+  el.innerHTML = Object.entries(zonas).map(([zona,items]) => `
+    <div class="zona-titulo">${zona}</div>
+    ${items.map(([id,t]) => {
+      total++;
+      if (t.hecho) hechos++;
+      return `<div class="limp-item ${t.hecho?'done':''}">
+        <input type="checkbox" ${t.hecho?'checked':''} onchange="toggleLimpieza('${id}',${!t.hecho})">
+        <span class="limp-nombre">${t.tarea||'—'}</span>
+        <span class="limp-frec ${frecs[t.frecuencia]||'frec-s'}">${t.frecuencia||'semanal'}</span>
+        <button style="background:none;border:none;color:#ddd;font-size:14px;cursor:pointer" onclick="eliminarLimpieza('${id}')"><i class="ti ti-trash"></i></button>
+      </div>`;
+    }).join('')}`).join('');
+  document.getElementById('prog-num').textContent = `${hechos} / ${total} tareas`;
+  document.getElementById('prog-fill').style.width = total ? Math.round(hechos/total*100)+'%' : '0%';
+}
+
+async function toggleLimpieza(id, val) {
+  await db.ref('hogar/limpieza/'+id+'/hecho').set(val);
+}
+async function eliminarLimpieza(id) {
+  await db.ref('hogar/limpieza/'+id).remove();
+}
+function abrirNuevaZona() { document.getElementById('panel-zona').classList.add('open'); }
+async function guardarTareaLimpieza() {
+  const tarea = document.getElementById('zona-tarea').value.trim();
+  if (!tarea) { toast('⚠ Escribí la tarea'); return; }
+  await db.ref('hogar/limpieza').push({
+    zona: document.getElementById('zona-nombre').value,
+    tarea, frecuencia: document.getElementById('zona-frec').value,
+    hecho: false, creado: Date.now()
+  });
+  cerrarPanel('panel-zona');
+  document.getElementById('zona-tarea').value = '';
+  toast('✓ Tarea de limpieza guardada');
+}
+
+// ===== MENÚ =====
+function renderMenuDias() {
+  const diasEl = document.getElementById('menu-dias');
+  const dias = [];
+  for (let i=0; i<7; i++) {
+    const d = new Date(hoy);
+    d.setDate(hoy.getDate() - hoy.getDay() + 1 + i);
+    dias.push(d);
+  }
+  diasEl.innerHTML = dias.map((d,i) => {
+    const esHoy = d.toDateString()===hoy.toDateString();
+    return `<div class="dia-btn ${esHoy?'hoy':''}" onclick="setDiaMenu(${i},this)">
+      <span class="dn">${d.getDate()}</span>${DIAS_S[d.getDay()]}
+    </div>`;
+  }).join('');
+  diaMenuActual = hoy.getDay()===0 ? 6 : hoy.getDay()-1;
+  renderMenuSlots(diaMenuActual);
+}
+
+function setDiaMenu(idx, btn) {
+  diaMenuActual = idx;
+  document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('hoy'));
+  btn.classList.add('hoy');
+  renderMenuSlots(idx);
+}
+
+function renderMenuSlots(idx) {
+  const d = new Date(hoy);
+  d.setDate(hoy.getDate() - hoy.getDay() + 1 + idx);
+  const fechaStr = d.toISOString().split('T')[0];
+  document.getElementById('menu-dia-label').textContent = `${DIAS_S[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+  const menuDia = menu[fechaStr] || {};
+  document.getElementById('menu-slots').innerHTML = COMIDAS.map(c => {
+    const slot = menuDia[c.key] || {};
+    return `<div class="comida-slot">
+      <div class="slot-header">
+        <span class="slot-tipo">${c.icon} ${c.label}</span>
+        ${slot.receta ? `<span class="slot-desde">Guardado</span>` : ''}
+        ${slot.receta ? `<button style="background:none;border:none;color:#ddd;font-size:14px;cursor:pointer" onclick="eliminarMenu('${fechaStr}','${c.key}')"><i class="ti ti-trash"></i></button>` : ''}
+      </div>
+      ${slot.receta ? `<div class="slot-receta">${slot.receta}</div><div class="slot-desc">${slot.desc||''}</div>` :
+        `<div class="slot-vacio" onclick="abrirMenuSlot('${fechaStr}','${c.key}','${c.label}')">+ Agregar ${c.label.toLowerCase()}...</div>`}
+    </div>`;
+  }).join('');
+}
+
+function abrirMenuSlot(fecha, slot, label) {
+  menuSlotActual = `${fecha}__${slot}`;
+  document.getElementById('menu-panel-titulo').textContent = `Agregar ${label}`;
+  document.getElementById('menu-receta').value = '';
+  document.getElementById('menu-desc').value = '';
+  document.getElementById('menu-ingredientes').value = '';
+  document.getElementById('panel-menu').classList.add('open');
+}
+
+async function guardarMenu() {
+  const receta = document.getElementById('menu-receta').value.trim();
+  if (!receta) { toast('⚠ Escribí el nombre de la comida'); return; }
+  const [fecha, slot] = menuSlotActual.split('__');
+  await db.ref(`hogar/menu/${fecha}/${slot}`).set({
+    receta, desc: document.getElementById('menu-desc').value,
+    ingredientes: document.getElementById('menu-ingredientes').value, creado: Date.now()
+  });
+  cerrarPanel('panel-menu');
+  renderMenuSlots(diaMenuActual);
+  toast('✓ Menú guardado');
+}
+
+async function eliminarMenu(fecha, slot) {
+  await db.ref(`hogar/menu/${fecha}/${slot}`).remove();
+  renderMenuSlots(diaMenuActual);
+}
+
+async function generarDesdeMenu() {
+  let count = 0;
+  Object.entries(menu).forEach(([fecha, dia]) => {
+    Object.entries(dia).forEach(([slot, s]) => {
+      if (!s.ingredientes) return;
+      const lines = s.ingredientes.split('\n').filter(l => l.trim());
+      lines.forEach(async line => {
+        const parts = line.trim().split(/\s+/);
+        const nombre = parts.slice(0,-1).join(' ') || line.trim();
+        const cant = parts[parts.length-1] || '';
+        await db.ref('hogar/compras').push({ cat_id: '', nombre: line.trim(), cantidad: '', done: false, desde_receta: true, creado: Date.now() });
+        count++;
+      });
+    });
+  });
+  setTimeout(() => toast(`✓ ${count} ingredientes agregados a la lista`), 500);
+  setTab('compras');
+}
+
+// UTILS
+function fabAccion() {
+  if (tabActual==='compras') abrirNuevaCat();
+  else if (tabActual==='pendientes') abrirNuevaTarea();
+  else if (tabActual==='limpieza') abrirNuevaZona();
+  else if (tabActual==='menu') toast('Tocá el + en cada slot del menú');
+}
+
+function cerrarPanel(id) { document.getElementById(id).classList.remove('open'); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
