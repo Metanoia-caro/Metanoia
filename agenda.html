@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#56112B">
+<title>Agenda — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+:root{
+  --hogar:#56112B;--hogar-soft:#f0d8e2;--hogar-mid:#8a2a50;
+  --trabajo:#719176;--trabajo-soft:#e0ebe1;--trabajo-dark:#4a6a50;
+  --yo:#D65FA9;--yo-soft:#fae0f2;--yo-dark:#a03a7a;
+  --fondo:#faf6f0;--fondo2:#f2ece4;--texto:#2a1018;--texto2:#6a5060;--borde:#ddd0cc;
+}
+.app{width:100%;height:100%;max-width:430px;margin:0 auto;background:var(--fondo);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* COVER */
+.cover{background:linear-gradient(160deg,var(--hogar) 0%,#1a0010 100%);padding:48px 18px 0;flex-shrink:0;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:32px;margin-bottom:14px}
+.cover-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff}
+.cover-sub{font-size:10px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:2px}
+
+/* TOGGLE VISTA */
+.vtoggle{display:flex;gap:4px}
+.vtbtn{padding:5px 10px;border-radius:7px;font-size:10px;font-weight:600;border:0.5px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.vtbtn.active{background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.4)}
+
+/* NAV SEMANA */
+.nav-bar{display:flex;align-items:center;justify-content:space-between;background:#6b1a3a;padding:8px 14px;flex-shrink:0}
+.nav-arrow{background:none;border:none;color:rgba(255,255,255,0.7);font-size:22px;cursor:pointer;padding:2px 8px;font-family:'Inter',sans-serif}
+.nav-label{font-size:12px;font-weight:600;color:#fff;letter-spacing:0.3px}
+.nav-hoy{font-size:10px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.15);border:0.5px solid rgba(255,255,255,0.25);color:#fff;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* BODY */
+.body{flex:1;overflow:hidden;position:relative}
+.vista-content{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.vista-content.active{display:block}
+
+/* LEYENDA */
+.leyenda{display:flex;gap:8px;padding:7px 12px;background:#fff;border-bottom:0.5px solid var(--borde);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.leyenda::-webkit-scrollbar{display:none}
+.ley{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--texto2);font-weight:600;white-space:nowrap}
+.ley-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* VISTA SEMANAL */
+.semana-wrap{padding:10px 10px 90px}
+.dias-header{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-bottom:6px}
+.dia-h{text-align:center;padding:6px 3px;border-radius:8px;background:#fff;border:0.5px solid var(--borde)}
+.dia-h.hoy{background:var(--hogar-soft);border-color:var(--hogar)}
+.dia-h-nombre{font-size:9px;font-weight:600;color:var(--texto2);text-transform:uppercase;letter-spacing:0.5px}
+.dia-h-num{font-size:16px;font-weight:700;color:var(--texto);line-height:1.2}
+.dia-h.hoy .dia-h-nombre,.dia-h.hoy .dia-h-num{color:var(--hogar)}
+.semana-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.dia-col{display:flex;flex-direction:column;gap:4px}
+.turno-card{border-radius:8px;padding:7px 6px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.07);transition:opacity .12s}
+.turno-card:active{opacity:0.8}
+.tc-hora{font-size:9px;font-weight:600;margin-bottom:2px}
+.tc-nombre{font-size:10px;font-weight:600;line-height:1.2}
+.tc-dur{font-size:8px;margin-top:1px;opacity:0.75}
+.tc-tipo{font-size:7px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-top:3px;opacity:0.8}
+.tc-fijo{background:#d6f0e8;color:#1a5a3a}
+.tc-quinc{background:var(--yo-soft);color:var(--yo-dark)}
+.tc-eval{background:#fae8cc;color:#7a4010}
+.tc-libre{background:var(--fondo2);color:#b0a0a8;border:0.5px dashed var(--borde)}
+.tc-colect{background:var(--hogar-soft);color:var(--hogar)}
+.add-slot{border-radius:8px;padding:6px;cursor:pointer;border:0.5px dashed var(--borde);background:transparent;display:flex;align-items:center;justify-content:center;color:var(--borde);font-size:18px;transition:all .12s;font-family:'Inter',sans-serif;width:100%}
+.add-slot:active{border-color:var(--trabajo);color:var(--trabajo);background:var(--trabajo-soft)}
+
+/* VISTA DÍA */
+.dia-wrap{padding:10px 14px 90px}
+.dia-titulo{font-family:'Playfair Display',serif;font-size:16px;color:var(--texto);font-style:italic;margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid var(--borde)}
+.hora-row{display:flex;gap:10px;margin-bottom:6px;min-height:50px}
+.hora-lbl{font-size:10px;color:var(--texto2);font-weight:600;min-width:38px;padding-top:4px}
+.hora-line{width:0.5px;background:var(--borde);flex-shrink:0}
+.hora-content{flex:1}
+.turno-dia{border-radius:9px;padding:9px 11px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.07);margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.td-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.td-info{flex:1}
+.td-nombre{font-size:12px;font-weight:600;color:var(--texto)}
+.td-det{font-size:10px;color:var(--texto2);margin-top:2px}
+.td-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:6px}
+.alarm-row{background:#fef9f0;border:0.5px solid #e8d8b0;border-radius:8px;padding:8px 10px;margin-top:4px;display:flex;align-items:center;gap:7px}
+.alarm-row i{color:#b8860b;font-size:15px}
+.alarm-txt{font-size:10px;color:#6b5a2a;flex:1}
+.alarm-time{font-size:10px;font-weight:600;color:#b8860b}
+
+/* NUEVO TURNO */
+.panel-nuevo{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
+.panel-nuevo.open{display:flex}
+.pn-cover{background:linear-gradient(160deg,var(--hogar),#1a0010);padding:48px 16px 16px;flex-shrink:0;position:relative}
+.pn-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.pn-titulo{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;margin-top:32px}
+.pn-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+
+.campo{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.campo label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase}
+.campo input,.campo select,.campo textarea{background:#fff;border:0.5px solid var(--borde);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.campo input:focus,.campo select:focus{border-color:var(--hogar)}
+.crow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cfull{grid-column:1/-1}
+
+.tipo-sel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.tipo-opt{padding:9px 5px;border-radius:9px;border:0.5px solid var(--borde);text-align:center;cursor:pointer;font-size:10px;font-weight:600;color:var(--texto2);background:#fff;font-family:'Inter',sans-serif;transition:all .15s}
+.tipo-opt.sel-fijo{background:#d6f0e8;color:#1a5a3a;border-color:var(--trabajo)}
+.tipo-opt.sel-quinc{background:var(--yo-soft);color:var(--yo-dark);border-color:var(--yo)}
+.tipo-opt.sel-eval{background:#fae8cc;color:#7a4010;border-color:#c8860b}
+
+.alarm-config{display:flex;align-items:center;gap:8px;background:#fef9f0;border:0.5px solid #e8d8b0;border-radius:8px;padding:9px 11px;margin-bottom:10px}
+.alarm-config i{color:#b8860b;font-size:16px}
+.alarm-config span{font-size:11px;color:#6b5a2a;flex:1}
+.alarm-config input{width:50px;text-align:center;border:0.5px solid #e8d8b0;border-radius:6px;background:#fff;padding:4px;font-size:11px;font-family:'Inter',sans-serif;outline:none}
+
+.btn{width:100%;padding:12px;background:var(--hogar);color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-out{width:100%;padding:10px;background:transparent;color:var(--texto2);border:0.5px solid var(--borde);border-radius:10px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:6px}
+.btn-del{width:100%;padding:10px;background:transparent;color:#b85a5a;border:0.5px solid #f0d0d0;border-radius:10px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:6px}
+
+.fab{position:fixed;bottom:20px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--hogar);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(86,17,43,0.4);z-index:50}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--trabajo-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:30px 20px;color:var(--texto2);font-size:11px}
+
+/* DETALLE TURNO */
+.panel-detalle{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
+.panel-detalle.open{display:flex}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="cover">
+    <button class="cover-back" onclick="location.href='index.html'"><i class="ti ti-arrow-left"></i> Inicio</button>
+    <div class="cover-row">
+      <div>
+        <div class="cover-title">📅 Agenda</div>
+        <div class="cover-sub" id="cover-sub">Cargando...</div>
+      </div>
+      <div class="vtoggle">
+        <button class="vtbtn active" id="btn-semana" onclick="setVista('semana')"><i class="ti ti-layout-grid"></i> Semana</button>
+        <button class="vtbtn" id="btn-dia" onclick="setVista('dia')"><i class="ti ti-list"></i> Día</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-arrow" onclick="navegar(-1)">‹</button>
+    <span class="nav-label" id="nav-label">Cargando...</span>
+    <button class="nav-hoy" onclick="irHoy()">Hoy</button>
+    <button class="nav-arrow" onclick="navegar(1)">›</button>
+  </div>
+
+  <div class="leyenda">
+    <div class="ley"><div class="ley-dot" style="background:#d6f0e8;border:0.5px solid var(--trabajo)"></div>Fijo semanal</div>
+    <div class="ley"><div class="ley-dot" style="background:var(--yo-soft);border:0.5px solid var(--yo)"></div>Quincenal</div>
+    <div class="ley"><div class="ley-dot" style="background:#fae8cc;border:0.5px solid #c8860b"></div>Evaluación</div>
+    <div class="ley"><div class="ley-dot" style="background:var(--hogar-soft);border:0.5px solid var(--hogar)"></div>Colectivando</div>
+    <div class="ley"><div class="ley-dot" style="background:var(--fondo2);border:0.5px dashed var(--borde)"></div>Libre</div>
+  </div>
+
+  <div class="body">
+
+    <!-- VISTA SEMANAL -->
+    <div class="vista-content active" id="vista-semana">
+      <div class="semana-wrap">
+        <div class="dias-header" id="dias-header"></div>
+        <div class="semana-grid" id="semana-grid"></div>
+      </div>
+    </div>
+
+    <!-- VISTA DÍA -->
+    <div class="vista-content" id="vista-dia">
+      <div class="dia-wrap" id="dia-wrap"></div>
+    </div>
+
+  </div>
+
+  <button class="fab" onclick="abrirNuevo()">＋</button>
+
+  <!-- PANEL NUEVO TURNO -->
+  <div class="panel-nuevo" id="panel-nuevo">
+    <div class="pn-cover">
+      <button class="pn-back" onclick="cerrarNuevo()"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="pn-titulo">Nuevo turno</div>
+    </div>
+    <div class="pn-body">
+
+      <div class="campo">
+        <label>Paciente</label>
+        <select id="nt-pac">
+          <option value="">Seleccioná un paciente...</option>
+        </select>
+      </div>
+
+      <div style="font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px">Tipo de turno</div>
+      <div class="tipo-sel">
+        <button class="tipo-opt sel-fijo" id="opt-fijo" onclick="selTipo('fijo')">📅 Fijo<br>semanal</button>
+        <button class="tipo-opt" id="opt-quinc" onclick="selTipo('quinc')">📅 Quincenal</button>
+        <button class="tipo-opt" id="opt-eval" onclick="selTipo('eval')">📋 Evaluación<br>/ único</button>
+      </div>
+
+      <div class="crow">
+        <div class="campo">
+          <label>Día</label>
+          <select id="nt-dia">
+            <option value="lunes">Lunes</option>
+            <option value="martes">Martes</option>
+            <option value="miercoles">Miércoles</option>
+            <option value="jueves">Jueves</option>
+            <option value="viernes">Viernes</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Fecha</label>
+          <input type="date" id="nt-fecha">
+        </div>
+        <div class="campo">
+          <label>Hora inicio</label>
+          <input type="time" id="nt-hora" value="09:00">
+        </div>
+        <div class="campo">
+          <label>Duración (min)</label>
+          <input type="number" id="nt-dur" value="50" min="15" step="5">
+        </div>
+        <div class="campo cfull">
+          <label>Modalidad</label>
+          <select id="nt-modal">
+            <option value="os">Obra social</option>
+            <option value="particular">Particular</option>
+          </select>
+        </div>
+        <div class="campo cfull">
+          <label>Notas del turno</label>
+          <input type="text" id="nt-notas" placeholder="Materiales a preparar, observaciones...">
+        </div>
+      </div>
+
+      <div class="alarm-config">
+        <i class="ti ti-bell"></i>
+        <span>Recordatorio previo al turno</span>
+        <input type="number" id="nt-alarm" value="15" min="5" step="5"> min
+      </div>
+
+      <button class="btn" onclick="guardarTurno()"><i class="ti ti-check"></i> Guardar turno</button>
+      <button class="btn-out" onclick="cerrarNuevo()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL DETALLE TURNO -->
+  <div class="panel-detalle" id="panel-detalle">
+    <div class="pn-cover">
+      <button class="pn-back" onclick="cerrarDetalle()"><i class="ti ti-arrow-left"></i> Agenda</button>
+      <div class="pn-titulo" id="det-pac-nombre">—</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px" id="det-info">—</div>
+    </div>
+    <div class="pn-body">
+      <div id="det-contenido"></div>
+      <button class="btn" onclick="location.href='pacientes.html'"><i class="ti ti-user"></i> Ver ficha del paciente</button>
+      <button class="btn-del" onclick="eliminarTurno()">Eliminar turno</button>
+      <button class="btn-out" onclick="cerrarDetalle()">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+  authDomain: "metanoia-caro.firebaseapp.com",
+  projectId: "metanoia-caro",
+  storageBucket: "metanoia-caro.firebasestorage.app",
+  messagingSenderId: "241874727",
+  appId: "1:241874727:web:ac149b414b517019631b02",
+  databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ESTADO
+let vistaActual = 'semana';
+let tipoActual = 'fijo';
+let fechaBase = new Date();
+let turnos = {};
+let pacientes = {};
+let turnoActualId = null;
+
+const DIAS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const DIAS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+// CARGAR DATOS
+db.ref('turnos').on('value', snap => { turnos = snap.val() || {}; renderVista(); });
+db.ref('pacientes').on('value', snap => {
+  pacientes = snap.val() || {};
+  const sel = document.getElementById('nt-pac');
+  sel.innerHTML = '<option value="">Seleccioná un paciente...</option>';
+  Object.entries(pacientes).forEach(([id, p]) => {
+    sel.innerHTML += `<option value="${id}">${p.nombre || 'Sin nombre'}</option>`;
+  });
+});
+
+// NAVEGACIÓN
+function getLunesDeSemana(fecha) {
+  const d = new Date(fecha);
+  const dia = d.getDay();
+  const diff = dia === 0 ? -6 : 1 - dia;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function navegar(dir) {
+  if (vistaActual === 'semana') fechaBase.setDate(fechaBase.getDate() + dir * 7);
+  else fechaBase.setDate(fechaBase.getDate() + dir);
+  renderVista();
+}
+
+function irHoy() { fechaBase = new Date(); renderVista(); }
+
+function setVista(v) {
+  vistaActual = v;
+  document.getElementById('vista-semana').classList.toggle('active', v === 'semana');
+  document.getElementById('vista-dia').classList.toggle('active', v === 'dia');
+  document.getElementById('btn-semana').classList.toggle('active', v === 'semana');
+  document.getElementById('btn-dia').classList.toggle('active', v === 'dia');
+  renderVista();
+}
+
+function renderVista() {
+  if (vistaActual === 'semana') renderSemana();
+  else renderDia();
+}
+
+// RENDER SEMANA
+function renderSemana() {
+  const lunes = getLunesDeSemana(fechaBase);
+  const hoy = new Date();
+  const dias = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    dias.push(d);
+  }
+
+  document.getElementById('nav-label').textContent = `${dias[0].getDate()} – ${dias[4].getDate()} de ${MESES[dias[0].getMonth()]} · ${dias[0].getFullYear()}`;
+  document.getElementById('cover-sub').textContent = `Semana del ${dias[0].getDate()} al ${dias[4].getDate()} de ${MESES[dias[0].getMonth()]}`;
+
+  // Headers
+  document.getElementById('dias-header').innerHTML = dias.map(d => {
+    const esHoy = d.toDateString() === hoy.toDateString();
+    return `<div class="dia-h ${esHoy ? 'hoy' : ''}">
+      <div class="dia-h-nombre">${DIAS_SHORT[d.getDay()]}</div>
+      <div class="dia-h-num">${d.getDate()}</div>
+    </div>`;
+  }).join('');
+
+  // Grid
+  document.getElementById('semana-grid').innerHTML = dias.map(d => {
+    const fechaStr = d.toISOString().split('T')[0];
+    const diaStr = DIAS[d.getDay()];
+    const turnosDia = Object.entries(turnos).filter(([id, t]) => {
+      if (t.tipo === 'eval') return t.fecha === fechaStr;
+      if (t.tipo === 'fijo') return t.dia === diaStr;
+      if (t.tipo === 'quinc') {
+        if (t.dia !== diaStr) return false;
+        if (!t.fecha_inicio) return true;
+        const inicio = new Date(t.fecha_inicio);
+        const diffMs = d - inicio;
+        const diffSemanas = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+        return diffSemanas >= 0 && diffSemanas % 2 === 0;
+      }
+      return false;
+    }).sort((a,b) => (a[1].hora||'').localeCompare(b[1].hora||''));
+
+    const cards = turnosDia.map(([id, t]) => {
+      const p = pacientes[t.paciente_id] || {};
+      const colect = p.colectivando;
+      let cls = colect ? 'tc-colect' : t.tipo === 'fijo' ? 'tc-fijo' : t.tipo === 'quinc' ? 'tc-quinc' : 'tc-eval';
+      const tipLabel = t.tipo === 'fijo' ? 'Fijo' : t.tipo === 'quinc' ? 'Quinc.' : 'Eval.';
+      return `<div class="turno-card ${cls}" onclick="abrirDetalle('${id}')">
+        <div class="tc-hora">${t.hora||'—'}</div>
+        <div class="tc-nombre">${t.paciente_nombre||'—'}</div>
+        <div class="tc-dur">${t.duracion||50} min</div>
+        <div class="tc-tipo">${tipLabel}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="dia-col">
+      ${cards}
+      <button class="add-slot" onclick="abrirNuevoEnDia('${fechaStr}','${diaStr}')">＋</button>
+    </div>`;
+  }).join('');
+}
+
+// RENDER DÍA
+function renderDia() {
+  const hoy = fechaBase;
+  const fechaStr = hoy.toISOString().split('T')[0];
+  const diaStr = DIAS[hoy.getDay()];
+  const diaLabel = `${DIAS_SHORT[hoy.getDay()]} ${hoy.getDate()} de ${MESES[hoy.getMonth()]} · ${hoy.getFullYear()}`;
+
+  document.getElementById('nav-label').textContent = diaLabel;
+  document.getElementById('cover-sub').textContent = diaLabel;
+
+  const turnosDia = Object.entries(turnos).filter(([id, t]) => {
+    if (t.tipo === 'eval') return t.fecha === fechaStr;
+    if (t.tipo === 'fijo') return t.dia === diaStr;
+    if (t.tipo === 'quinc') {
+      if (t.dia !== diaStr) return false;
+      if (!t.fecha_inicio) return true;
+      const inicio = new Date(t.fecha_inicio);
+      const diffMs = hoy - inicio;
+      const diffSemanas = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+      return diffSemanas >= 0 && diffSemanas % 2 === 0;
+    }
+    return false;
+  }).sort((a,b) => (a[1].hora||'').localeCompare(b[1].hora||''));
+
+  const horas = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+  let html = `<div class="dia-titulo">${diaLabel}</div>`;
+
+  if (turnosDia.length === 0) {
+    html += `<div class="empty">📅 Sin turnos este día.<br>Tocá el + para agregar uno.</div>`;
+  } else {
+    html += turnosDia.map(([id, t]) => {
+      const p = pacientes[t.paciente_id] || {};
+      const colect = p.colectivando;
+      let bg = colect ? 'var(--hogar-soft)' : t.tipo === 'fijo' ? '#d6f0e8' : t.tipo === 'quinc' ? 'var(--yo-soft)' : '#fae8cc';
+      let dot = colect ? 'var(--hogar)' : t.tipo === 'fijo' ? 'var(--trabajo)' : t.tipo === 'quinc' ? 'var(--yo)' : '#c8860b';
+      let badge = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
+      const horaFin = calcHoraFin(t.hora, t.duracion);
+      return `<div class="hora-row">
+        <div class="hora-lbl">${t.hora||'—'}</div>
+        <div class="hora-line"></div>
+        <div class="hora-content">
+          <div class="turno-dia" style="background:${bg};border-color:${dot}" onclick="abrirDetalle('${id}')">
+            <div class="td-dot" style="background:${dot}"></div>
+            <div class="td-info">
+              <div class="td-nombre">${t.paciente_nombre||'—'}</div>
+              <div class="td-det">${t.hora||'—'} – ${horaFin} · ${t.duracion||50} min · ${t.modalidad||'OS'}${colect ? ' · 🤝' : ''}</div>
+            </div>
+            <div class="td-badge" style="background:${bg};color:${dot}">${badge}</div>
+          </div>
+          ${t.alarma ? `<div class="alarm-row"><i class="ti ti-bell"></i><span class="alarm-txt">Recordatorio: ${t.notas||t.paciente_nombre}</span><span class="alarm-time">${calcHoraFin(t.hora, -(t.alarma||15))}</span></div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  html += `<button class="btn" style="margin-top:12px" onclick="abrirNuevoEnDia('${fechaStr}','${diaStr}')"><i class="ti ti-plus"></i> Agregar turno</button>`;
+  document.getElementById('dia-wrap').innerHTML = html;
+}
+
+function calcHoraFin(hora, mins) {
+  if (!hora) return '—';
+  const [h, m] = hora.split(':').map(Number);
+  const total = h * 60 + m + parseInt(mins || 0);
+  const hf = Math.floor(Math.abs(total) / 60) % 24;
+  const mf = Math.abs(total) % 60;
+  return `${String(hf).padStart(2,'0')}:${String(mf).padStart(2,'0')}`;
+}
+
+// NUEVO TURNO
+function abrirNuevo() {
+  document.getElementById('nt-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('panel-nuevo').classList.add('open');
+}
+
+function abrirNuevoEnDia(fecha, dia) {
+  document.getElementById('nt-fecha').value = fecha;
+  document.getElementById('nt-dia').value = dia;
+  document.getElementById('panel-nuevo').classList.add('open');
+}
+
+function cerrarNuevo() { document.getElementById('panel-nuevo').classList.remove('open'); }
+
+function selTipo(t) {
+  tipoActual = t;
+  ['fijo','quinc','eval'].forEach(x => {
+    document.getElementById('opt-' + x).className = 'tipo-opt' + (x === t ? ` sel-${t}` : '');
+  });
+}
+
+async function guardarTurno() {
+  const pacId = document.getElementById('nt-pac').value;
+  if (!pacId) { toast('⚠ Seleccioná un paciente'); return; }
+  const p = pacientes[pacId] || {};
+  const turno = {
+    paciente_id: pacId,
+    paciente_nombre: p.nombre || '—',
+    tipo: tipoActual,
+    dia: document.getElementById('nt-dia').value,
+    fecha: document.getElementById('nt-fecha').value,
+    fecha_inicio: document.getElementById('nt-fecha').value,
+    hora: document.getElementById('nt-hora').value,
+    duracion: parseInt(document.getElementById('nt-dur').value) || 50,
+    modalidad: document.getElementById('nt-modal').value,
+    notas: document.getElementById('nt-notas').value,
+    alarma: parseInt(document.getElementById('nt-alarm').value) || 15,
+    colectivando: p.colectivando || false,
+    creado: Date.now()
+  };
+  await db.ref('turnos').push(turno);
+  cerrarNuevo();
+  toast('✓ Turno guardado');
+  document.getElementById('nt-notas').value = '';
+}
+
+// DETALLE
+function abrirDetalle(id) {
+  const t = turnos[id];
+  if (!t) return;
+  turnoActualId = id;
+  const p = pacientes[t.paciente_id] || {};
+  document.getElementById('det-pac-nombre').textContent = t.paciente_nombre || '—';
+  const tipLabel = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
+  document.getElementById('det-info').textContent = `${t.hora||'—'} · ${t.duracion||50} min · ${tipLabel}`;
+  const horaFin = calcHoraFin(t.hora, t.duracion);
+  document.getElementById('det-contenido').innerHTML = `
+    <div style="background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:12px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Hora</div><div style="font-size:14px;font-weight:600;color:var(--texto)">${t.hora||'—'} – ${horaFin}</div></div>
+        <div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Duración</div><div style="font-size:14px;font-weight:600;color:var(--texto)">${t.duracion||50} min</div></div>
+        <div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Tipo</div><div style="font-size:12px;font-weight:600;color:var(--texto)">${tipLabel}</div></div>
+        <div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Modalidad</div><div style="font-size:12px;font-weight:600;color:var(--texto)">${t.modalidad === 'os' ? 'Obra social' : 'Particular'}</div></div>
+        ${t.dia ? `<div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Día</div><div style="font-size:12px;font-weight:600;color:var(--texto)">${t.dia}</div></div>` : ''}
+        ${p.os_nombre ? `<div><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Obra social</div><div style="font-size:12px;font-weight:600;color:var(--texto)">${p.os_nombre}</div></div>` : ''}
+      </div>
+      ${t.notas ? `<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--borde)"><div style="font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Notas</div><div style="font-size:12px;color:var(--texto);line-height:1.5">${t.notas}</div></div>` : ''}
+      ${p.colectivando ? `<div style="margin-top:10px;background:var(--yo-soft);border-radius:7px;padding:7px 10px;font-size:11px;color:var(--yo-dark);font-weight:600">🤝 Paciente de Colectivando</div>` : ''}
+    </div>`;
+  document.getElementById('panel-detalle').classList.add('open');
+}
+
+function cerrarDetalle() { document.getElementById('panel-detalle').classList.remove('open'); turnoActualId = null; }
+
+async function eliminarTurno() {
+  if (!turnoActualId) return;
+  const t = turnos[turnoActualId];
+  if (!confirm(`¿Eliminar turno de ${t?.paciente_nombre||'este paciente'}?`)) return;
+  await db.ref('turnos/' + turnoActualId).remove();
+  cerrarDetalle();
+  toast('Turno eliminado');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// INIT
+irHoy();
+</script>
+</body>
+</html>
