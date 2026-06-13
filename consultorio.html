@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#719176">
+<title>Consultorio — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+.app{width:100%;min-height:100vh;max-width:430px;margin:0 auto;background:#faf6f0;display:flex;flex-direction:column}
+.cover{background:linear-gradient(160deg,#4a6a50 0%,#1a2a1a 100%);padding:56px 20px 30px;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:#fff;margin-top:32px}
+.cover-sub{font-size:11px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:4px}
+.body{flex:1;padding:20px 16px 40px}
+.card{background:#fff;border:0.5px solid #ddd0cc;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;gap:14px;align-items:center;border-left:4px solid;transition:all .15s}
+.card:active{transform:scale(0.98)}
+.card-icon{font-size:28px;flex-shrink:0}
+.card-info{flex:1}
+.card-nombre{font-size:14px;font-weight:700;color:#2a1018;margin-bottom:3px}
+.card-desc{font-size:11px;color:#6a5060;line-height:1.4}
+.card-arrow{font-size:20px;color:#ddd0cc}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="cover">
+    <button class="cover-back" onclick="history.back()"><i class="ti ti-arrow-left"></i> Trabajo</button>
+    <div class="cover-title">🧠 Consultorio</div>
+    <div class="cover-sub">Psicopedagogía clínica</div>
+  </div>
+  <div class="body">
+    <div class="card" style="border-left-color:#719176" onclick="location.href='pacientes.html'">
+      <div class="card-icon">👤</div>
+      <div class="card-info"><div class="card-nombre">Pacientes</div><div class="card-desc">Fichas, sesiones, admisión y seguimiento</div></div>
+      <i class="ti ti-chevron-right card-arrow"></i>
+    </div>
+    <div class="card" style="border-left-color:#56112B" onclick="location.href='agenda.html'">
+      <div class="card-icon">📅</div>
+      <div class="card-info"><div class="card-nombre">Agenda de turnos</div><div class="card-desc">Vista semanal y diaria · Todos los turnos</div></div>
+      <i class="ti ti-chevron-right card-arrow"></i>
+    </div>
+    <div class="card" style="border-left-color:#D65FA9" onclick="location.href='cobros.html'">
+      <div class="card-icon">💰</div>
+      <div class="card-info"><div class="card-nombre">Control de cobros</div><div class="card-desc">Por mes y por paciente · Colectivando</div></div>
+      <i class="ti ti-chevron-right card-arrow"></i>
+    </div>
+    <div class="card" style="border-left-color:#4a6a50" onclick="location.href='obras.html'">
+      <div class="card-icon">🏥</div>
+      <div class="card-info"><div class="card-nombre">Obras sociales</div><div class="card-desc">Facturación · Credenciales · Descripciones</div></div>
+      <i class="ti ti-chevron-right card-arrow"></i>
+    </div>
+  </div>
+</div>
+</body>
+</html>
