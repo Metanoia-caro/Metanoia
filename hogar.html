@@ -294,6 +294,15 @@ body{font-family:'Inter',sans-serif}
     </div>
     <div class="panel-body">
       <input type="hidden" id="menu-slot-key">
+
+      <!-- REUTILIZAR DE SEMANAS ANTERIORES -->
+      <div id="sugerencias-wrap" style="margin-bottom:12px">
+        <div style="font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">🔄 Reutilizar una receta anterior</div>
+        <div id="sugerencias-lista" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <div style="height:0.5px;background:var(--borde);margin-bottom:10px"></div>
+        <div style="font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✏️ O escribí una nueva</div>
+      </div>
+
       <div class="campo"><label>Comida / Receta</label><input id="menu-receta" placeholder="Ej: Tarta de espinaca..."></div>
       <div class="campo"><label>Descripción / Ingredientes principales</label><input id="menu-desc" placeholder="Ej: Con ensalada verde"></div>
       <div class="campo"><label>Ingredientes para la lista de compras</label>
@@ -591,7 +600,39 @@ function abrirMenuSlot(fecha, slot, label) {
   document.getElementById('menu-receta').value = '';
   document.getElementById('menu-desc').value = '';
   document.getElementById('menu-ingredientes').value = '';
+
+  // Cargar sugerencias de semanas anteriores (mismo slot)
+  const todasLasRecetas = [];
+  const vistas = new Set();
+  Object.entries(menu).forEach(([f, dia]) => {
+    if(f !== fecha && dia[slot]) {
+      const r = dia[slot];
+      if(r.receta && !vistas.has(r.receta)) {
+        vistas.add(r.receta);
+        todasLasRecetas.push(r);
+      }
+    }
+  });
+  const lista = document.getElementById('sugerencias-lista');
+  if(todasLasRecetas.length) {
+    lista.innerHTML = todasLasRecetas.slice(0,8).map(r =>
+      `<button onclick="usarRecetaAnterior(${JSON.stringify(r).replace(/"/g,'&quot;')})"
+        style="background:#fff;border:0.5px solid var(--borde);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:var(--hogar);cursor:pointer;font-family:'Inter',sans-serif;text-align:left">
+        ${r.receta}
+      </button>`).join('');
+  } else {
+    lista.innerHTML = '<div style="font-size:11px;color:var(--texto2)">Sin recetas anteriores para este horario</div>';
+  }
+
   document.getElementById('panel-menu').classList.add('open');
+}
+
+function usarRecetaAnterior(r) {
+  document.getElementById('menu-receta').value = r.receta || '';
+  document.getElementById('menu-desc').value = r.desc || '';
+  document.getElementById('menu-ingredientes').value = r.ingredientes || '';
+  document.getElementById('menu-receta').focus();
+  toast('✓ Receta cargada — podés editarla o guardarla');
 }
 
 async function guardarMenu() {
