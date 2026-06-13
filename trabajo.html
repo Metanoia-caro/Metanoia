@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4a6a50">
+<title>Trabajo — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#1a0010}
+body{font-family:'Inter',sans-serif}
+.app{width:100%;min-height:100vh;max-width:430px;margin:0 auto;background:#faf6f0;display:flex;flex-direction:column}
+
+.cover{background:linear-gradient(160deg,#2d4a32 0%,#0f1f0f 100%);padding:56px 20px 30px;position:relative}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.cover-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:#fff;margin-top:32px}
+.cover-sub{font-size:11px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-top:4px}
+
+.body{flex:1;padding:20px 16px 40px}
+.sec-label{font-size:9px;font-weight:700;color:#6a5060;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 12px}
+
+.lugar-card{background:#fff;border:0.5px solid #ddd0cc;border-radius:16px;padding:20px;margin-bottom:14px;cursor:pointer;display:flex;gap:16px;align-items:center;transition:all .15s;border-left:5px solid}
+.lugar-card:active{transform:scale(0.98)}
+.lugar-icono{font-size:44px;flex-shrink:0}
+.lugar-info{flex:1}
+.lugar-nombre{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#2a1018;margin-bottom:4px}
+.lugar-desc{font-size:12px;color:#6a5060;line-height:1.5;margin-bottom:10px}
+.lugar-tags{display:flex;gap:5px;flex-wrap:wrap}
+.ltag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px}
+.lugar-arrow{font-size:22px;color:#ddd0cc;flex-shrink:0}
+
+.agenda-card{background:linear-gradient(135deg,#2d4a32,#0f1f0f);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.agenda-card i{font-size:24px;color:#8ab88a}
+.agenda-info{flex:1}
+.agenda-title{font-size:14px;font-weight:700;color:#fff}
+.agenda-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px}
+.agenda-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:7px;background:rgba(138,184,138,0.2);color:#8ab88a}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="cover">
+    <button class="cover-back" onclick="location.href='index.html'"><i class="ti ti-arrow-left"></i> Inicio</button>
+    <div class="cover-title">💼 Trabajo</div>
+    <div class="cover-sub">Seleccioná tu espacio de trabajo</div>
+  </div>
+
+  <div class="body">
+    <div class="sec-label" style="margin-top:4px">Agenda compartida</div>
+    <div class="agenda-card" onclick="location.href='agenda.html'">
+      <i class="ti ti-calendar"></i>
+      <div class="agenda-info">
+        <div class="agenda-title">Agenda de turnos</div>
+        <div class="agenda-sub">Consultorio + FADYCC en un solo lugar</div>
+      </div>
+      <div class="agenda-badge">Abrir →</div>
+    </div>
+
+    <div class="sec-label">Mis espacios de trabajo</div>
+
+    <div class="lugar-card" style="border-left-color:#719176" onclick="location.href='index.html#consultorio'">
+      <div class="lugar-icono">🧠</div>
+      <div class="lugar-info">
+        <div class="lugar-nombre">Consultorio</div>
+        <div class="lugar-desc">Psicopedagogía clínica. Pacientes, fichas, sesiones, cobros y obras sociales.</div>
+        <div class="lugar-tags">
+          <span class="ltag" style="background:#e0ebe1;color:#4a6a50">👤 Pacientes</span>
+          <span class="ltag" style="background:#f0d8e2;color:#56112B">💰 Cobros</span>
+          <span class="ltag" style="background:#fae0f2;color:#a03a7a">🤝 Colectivando</span>
+          <span class="ltag" style="background:#f0d8e2;color:#56112B">🏥 Obras sociales</span>
+        </div>
+      </div>
+      <i class="ti ti-chevron-right lugar-arrow"></i>
+    </div>
+
+    <div class="lugar-card" style="border-left-color:#4a6a50" onclick="location.href='fadycc.html'">
+      <div class="lugar-icono">🎓</div>
+      <div class="lugar-info">
+        <div class="lugar-nombre">FADYCC · UNNE</div>
+        <div class="lugar-desc">Facultad de Artes, Diseño y Ciencias de la Cultura. Carreras, directores, expedientes y bitácora.</div>
+        <div class="lugar-tags">
+          <span class="ltag" style="background:#e0ebe1;color:#2d4a32">🎵 Carreras</span>
+          <span class="ltag" style="background:#e0ebe1;color:#2d4a32">📄 Expedientes</span>
+          <span class="ltag" style="background:#e0ebe1;color:#2d4a32">✅ Checklist</span>
+          <span class="ltag" style="background:#e0ebe1;color:#2d4a32">📝 Bitácora</span>
+        </div>
+      </div>
+      <i class="ti ti-chevron-right lugar-arrow"></i>
+    </div>
+  </div>
+</div>
+</body>
+</html>
