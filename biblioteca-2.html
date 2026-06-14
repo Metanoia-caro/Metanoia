@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3d2b1f">
+<title>Biblioteca — Metanoia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a0f08}
+body{font-family:'Inter',sans-serif}
+:root{
+  --madera:#5c3d2e;--madera-dark:#3d2b1f;--madera-light:#8b6347;
+  --madera-soft:#f5ede6;--madera-mid:#c4a882;
+  --yo:#D65FA9;--yo-soft:#fae0f2;--yo-dark:#a03a7a;
+  --fondo:#faf6f0;--fondo2:#f2ece4;--texto:#2a1a0f;--texto2:#6a5040;--borde:#ddd0cc;
+  --leido:#4caf50;--leyendo:#ff9800;--noleido:#9e9e9e;
+  --prestado:#e91e63;
+}
+.app{width:100%;height:100%;max-width:430px;margin:0 auto;background:var(--fondo);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* COVER */
+.cover{background:linear-gradient(160deg,var(--madera-dark) 0%,#1a0f08 100%);padding:48px 18px 0;flex-shrink:0;position:relative;overflow:hidden}
+.cover-texture{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,0.015) 60px,rgba(255,255,255,0.015) 61px);pointer-events:none}
+.cover-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;z-index:1}
+.cover-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:32px;margin-bottom:6px;position:relative;z-index:1}
+.cover-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff}
+.cover-sub{font-size:10px;color:rgba(255,255,255,0.55);font-style:italic;font-family:'Playfair Display',serif;margin-bottom:0;position:relative;z-index:1}
+.cover-stats{display:flex;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+.cstat{background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;text-align:center}
+.cstat-n{font-size:16px;font-weight:700;color:#fff}
+.cstat-l{font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px}
+
+/* TABS */
+.inner-tabs{display:flex;background:#fff;border-bottom:1px solid var(--borde);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.inner-tabs::-webkit-scrollbar{display:none}
+.itab{flex-shrink:0;padding:9px 14px;font-size:9px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;white-space:nowrap;transition:all .15s}
+.itab.active{color:var(--madera-dark);border-bottom-color:var(--madera);background:#fdf5ee}
+
+/* BODY */
+.body{flex:1;overflow:hidden}
+.vista{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.vista.active{display:block}
+
+/* BARRA BÚSQUEDA Y FILTROS */
+.search-wrap{padding:10px 12px 0;background:#fff;border-bottom:0.5px solid var(--borde)}
+.search-row{display:flex;gap:8px;margin-bottom:8px}
+.search-inp{flex:1;background:var(--fondo2);border:0.5px solid var(--borde);border-radius:9px;padding:8px 12px;font-size:12px;font-family:'Inter',sans-serif;outline:none;color:var(--texto)}
+.search-inp:focus{border-color:var(--madera)}
+.filter-btn{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:9px;padding:8px 10px;font-size:14px;cursor:pointer}
+.filtros-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+.filtros-row::-webkit-scrollbar{display:none}
+.fbtn{padding:4px 10px;border-radius:10px;font-size:9px;font-weight:700;border:0.5px solid var(--borde);background:var(--fondo);color:var(--texto2);cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0;transition:all .12s}
+.fbtn.active{background:var(--madera);color:#fff;border-color:var(--madera)}
+.fbtn.estado-leido{background:#d6f0e8;color:#1a5a3a;border-color:var(--leido)}
+.fbtn.estado-leyendo{background:#fff3e0;color:#7a4010;border-color:var(--leyendo)}
+.fbtn.estado-noleido{background:#f5f5f5;color:#555;border-color:#bbb}
+
+/* TOGGLE VISTA */
+.vista-toggle{display:flex;gap:4px;margin-left:auto}
+.vtbtn{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:6px;padding:5px 8px;font-size:14px;cursor:pointer;color:var(--texto2);transition:all .12s}
+.vtbtn.active{background:var(--madera);color:#fff;border-color:var(--madera)}
+
+/* ===== ESTANTE ===== */
+.estante-wrap{padding:10px 8px 90px}
+.estante-genero{margin-bottom:24px}
+.estante-label{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;color:var(--madera-dark);margin-bottom:6px;padding:0 4px;display:flex;align-items:center;gap:8px}
+.estante-label::after{content:'';flex:1;height:0.5px;background:var(--madera-mid);opacity:0.4}
+.estante-label span{font-size:10px;color:var(--texto2);font-style:normal;font-family:'Inter',sans-serif}
+
+.estante{background:linear-gradient(180deg,#8b6347 0%,#6b4a35 60%,#4a3020 100%);border-radius:4px;padding:12px 8px 0;position:relative;min-height:130px;display:flex;align-items:flex-end;gap:2px;overflow-x:auto;scrollbar-width:none;box-shadow:0 4px 12px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.1)}
+.estante::-webkit-scrollbar{display:none}
+/* Tablón del estante */
+.estante::after{content:'';position:absolute;bottom:0;left:0;right:0;height:12px;background:linear-gradient(180deg,#5c3d2e,#3d2b1f);border-radius:0 0 4px 4px;box-shadow:0 3px 6px rgba(0,0,0,0.3)}
+/* Sombra lateral izq */
+.estante::before{content:'';position:absolute;top:0;left:0;bottom:12px;width:8px;background:linear-gradient(90deg,rgba(0,0,0,0.3),transparent);pointer-events:none;z-index:1}
+
+.lomo{flex-shrink:0;height:clamp(90px,20vw,120px);width:clamp(22px,5vw,30px);border-radius:2px 0 0 2px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;transition:transform .2s;margin-bottom:12px}
+.lomo:hover,.lomo:active{transform:translateY(-6px)}
+.lomo-titulo{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-family:'Lora',serif;font-size:clamp(7px,1.5vw,9px);font-weight:600;color:rgba(255,255,255,0.9);text-align:center;padding:4px 2px;line-height:1.2;overflow:hidden;max-height:80%;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
+.lomo-sombra{position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(0,0,0,0.25)}
+.lomo-brillo{position:absolute;left:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.15)}
+.lomo.prestado::after{content:'↗';position:absolute;top:3px;right:2px;font-size:8px;color:#fff;background:var(--prestado);border-radius:50%;width:12px;height:12px;display:flex;align-items:center;justify-content:center;font-size:7px;z-index:2}
+
+/* Agregar libro al estante */
+.lomo-add{flex-shrink:0;height:clamp(90px,20vw,120px);width:clamp(22px,5vw,30px);border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,0.3);border:1px dashed rgba(255,255,255,0.2);margin-bottom:12px;transition:all .15s}
+.lomo-add:hover{color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.4)}
+
+/* COLORES LOMOS */
+.col-0{background:linear-gradient(180deg,#8B0000,#6b0000)}
+.col-1{background:linear-gradient(180deg,#1a237e,#0d1257)}
+.col-2{background:linear-gradient(180deg,#1b5e20,#0a3d0a)}
+.col-3{background:linear-gradient(180deg,#4a148c,#2d0057)}
+.col-4{background:linear-gradient(180deg,#e65100,#bf360c)}
+.col-5{background:linear-gradient(180deg,#880e4f,#560027)}
+.col-6{background:linear-gradient(180deg,#006064,#003d40)}
+.col-7{background:linear-gradient(180deg,#33691e,#1b4a0a)}
+.col-8{background:linear-gradient(180deg,#37474f,#1a2a30)}
+.col-9{background:linear-gradient(180deg,#4e342e,#2d1b18)}
+.col-10{background:linear-gradient(180deg,#f57f17,#c65100)}
+.col-11{background:linear-gradient(180deg,#6a1b9a,#38006b)}
+
+/* VISTA GRILLA */
+.grilla-wrap{padding:10px 10px 90px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.libro-card{background:#fff;border:0.5px solid var(--borde);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .15s}
+.libro-card:active{transform:scale(0.97)}
+.libro-cover{width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--fondo2);display:flex;align-items:center;justify-content:center;font-size:28px}
+.libro-cover img{width:100%;height:100%;object-fit:cover}
+.libro-card-info{padding:6px 7px}
+.libro-card-titulo{font-size:10px;font-weight:700;color:var(--texto);line-height:1.3;margin-bottom:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.libro-card-autor{font-size:9px;color:var(--texto2)}
+.libro-estado-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px}
+
+/* LISTA */
+.lista-wrap{padding:8px 12px 90px}
+.libro-row{background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.libro-row-cover{width:38px;height:56px;border-radius:5px;object-fit:cover;background:var(--fondo2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+.libro-row-cover img{width:100%;height:100%;object-fit:cover}
+.libro-row-info{flex:1;min-width:0}
+.libro-row-titulo{font-size:12px;font-weight:600;color:var(--texto);line-height:1.3}
+.libro-row-autor{font-size:10px;color:var(--texto2);margin-top:2px}
+.libro-row-det{font-size:9px;color:var(--texto2);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap}
+.estado-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:6px}
+.badge-leido{background:#d6f0e8;color:#1a5a3a}
+.badge-leyendo{background:#fff3e0;color:#7a4010}
+.badge-noleido{background:#f5f5f5;color:#666}
+.badge-prestado{background:#fde8f0;color:#880e4f}
+
+/* PRÉSTAMOS */
+.prestamo-card{background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:11px 12px;margin-bottom:6px;border-left:4px solid var(--prestado)}
+.pr-titulo{font-size:12px;font-weight:600;color:var(--texto)}
+.pr-persona{font-size:11px;color:var(--prestado);font-weight:600;margin-top:3px}
+.pr-fecha{font-size:10px;color:var(--texto2);margin-top:2px}
+.pr-dias{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fde8f0;color:#880e4f}
+
+/* DESEOS */
+.deseo-libro{background:#fff;border:0.5px solid var(--borde);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:center}
+.dl-cover{width:38px;height:56px;border-radius:5px;background:var(--fondo2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.dl-cover img{width:100%;height:100%;object-fit:cover}
+
+/* CAMPOS */
+.campo{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.campo label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:0.8px;text-transform:uppercase}
+.campo input,.campo select,.campo textarea{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none}
+.campo input:focus,.campo select:focus{border-color:var(--madera);background:#fff}
+.crow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cfull{grid-column:1/-1}
+
+.btn{width:100%;padding:11px;background:var(--madera);color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn:active{opacity:0.85}
+.btn-out{width:100%;padding:9px;background:transparent;color:var(--texto2);border:0.5px solid var(--borde);border-radius:9px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:5px}
+.btn-del{width:100%;padding:9px;background:transparent;color:#b85a5a;border:0.5px solid #f0d0d0;border-radius:9px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;margin-top:5px}
+.add-btn{display:flex;align-items:center;gap:6px;width:100%;padding:10px 12px;background:#fdf5ee;border:0.5px dashed var(--madera-light);border-radius:9px;color:var(--madera-dark);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px}
+
+/* FAB */
+.fab{position:fixed;bottom:20px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--madera);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(92,61,46,0.5);z-index:50}
+
+/* PANEL */
+.panel{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
+.panel.open{display:flex}
+.panel-cover{background:linear-gradient(160deg,var(--madera-dark),#1a0f08);padding:48px 16px 16px;flex-shrink:0;position:relative}
+.panel-back{position:absolute;top:48px;left:14px;background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.panel-titulo{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#fff;margin-top:32px}
+.panel-body{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+
+/* DETALLE LIBRO */
+.det-cover-wrap{width:100%;height:200px;background:var(--fondo2);border-radius:12px;margin-bottom:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+.det-cover-wrap img{width:100%;height:100%;object-fit:contain}
+.det-cover-placeholder{font-size:60px}
+.det-edit-cover{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* ESCÁNER */
+.scanner-wrap{background:#000;border-radius:12px;overflow:hidden;margin-bottom:12px;position:relative;height:240px}
+.scanner-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.scanner-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.scanner-frame{width:220px;height:90px;border:2px solid #f5c518;border-radius:6px;box-shadow:0 0 0 1000px rgba(0,0,0,0.4)}
+.isbn-manual-row{display:flex;gap:8px;margin-bottom:10px}
+.isbn-inp{flex:1;background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--texto);letter-spacing:1px}
+.isbn-inp:focus{border-color:var(--madera)}
+.isbn-btn{background:var(--madera);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+
+/* ESTADO SELECTOR */
+.estado-sel{display:flex;gap:6px;margin-bottom:10px}
+.est-opt{flex:1;padding:9px 4px;border-radius:9px;border:0.5px solid var(--borde);background:#fff;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .12s;color:var(--texto2)}
+.est-opt.sel-leido{background:#d6f0e8;color:#1a5a3a;border-color:var(--leido)}
+.est-opt.sel-leyendo{background:#fff3e0;color:#7a4010;border-color:var(--leyendo)}
+.est-opt.sel-noleido{background:#f5f5f5;color:#555;border-color:#bbb}
+
+/* BUSCANDO */
+.buscando{text-align:center;padding:16px;color:var(--texto2);font-size:12px}
+.buscando .spin{display:inline-block;width:20px;height:20px;border:2px solid var(--borde);border-top-color:var(--madera);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.libro-encontrado{background:var(--fondo2);border:0.5px solid var(--borde);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.le-cover{width:50px;height:70px;border-radius:5px;object-fit:cover;flex-shrink:0}
+.le-info{flex:1}
+.le-titulo{font-size:13px;font-weight:700;color:var(--texto);margin-bottom:3px}
+.le-autor{font-size:11px;color:var(--texto2)}
+.le-anio{font-size:10px;color:var(--texto2);margin-top:2px}
+
+.sec-label{font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1.5px;text-transform:uppercase;margin:12px 0 7px}
+.empty{text-align:center;padding:30px;color:var(--texto2);font-size:12px;line-height:1.6}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--madera-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* COVER PREVIEW en panel nuevo libro */
+.cover-preview-wrap{width:80px;height:110px;border-radius:8px;background:var(--fondo2);border:0.5px solid var(--borde);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;cursor:pointer;position:relative}
+.cover-preview-wrap img{width:100%;height:100%;object-fit:cover}
+.cover-edit-hint{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);color:#fff;font-size:8px;text-align:center;padding:3px;font-family:'Inter',sans-serif}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="cover">
+    <div class="cover-texture"></div>
+    <button class="cover-back" onclick="location.href='yo.html'"><i class="ti ti-arrow-left"></i> Yo</button>
+    <div class="cover-row">
+      <div>
+        <div class="cover-title">📚 Mi Biblioteca</div>
+        <div class="cover-sub">Tu espacio de lectura personal</div>
+      </div>
+    </div>
+    <div class="cover-stats">
+      <div class="cstat"><div class="cstat-n" id="stat-total">0</div><div class="cstat-l">Total</div></div>
+      <div class="cstat"><div class="cstat-n" id="stat-leidos">0</div><div class="cstat-l">Leídos</div></div>
+      <div class="cstat"><div class="cstat-n" id="stat-leyendo">0</div><div class="cstat-l">Leyendo</div></div>
+      <div class="cstat"><div class="cstat-n" id="stat-prestados">0</div><div class="cstat-l">Prestados</div></div>
+    </div>
+  </div>
+
+  <div class="inner-tabs">
+    <button class="itab active" onclick="setTab('estante')">📚 Estante</button>
+    <button class="itab" onclick="setTab('lista')">📋 Lista</button>
+    <button class="itab" onclick="setTab('prestamos')">↗️ Préstamos</button>
+    <button class="itab" onclick="setTab('deseos')">🛒 Deseos</button>
+  </div>
+
+  <div class="body">
+
+    <!-- ESTANTE -->
+    <div class="vista active" id="tab-estante">
+      <div class="search-wrap">
+        <div class="search-row">
+          <input class="search-inp" type="text" placeholder="Buscar título, autor..." oninput="buscar(this.value)" id="search-inp">
+          <div class="vista-toggle">
+            <button class="vtbtn active" id="vt-estante" onclick="setVista('estante')" title="Estante"><i class="ti ti-books"></i></button>
+            <button class="vtbtn" id="vt-grilla" onclick="setVista('grilla')" title="Grilla"><i class="ti ti-layout-grid"></i></button>
+            <button class="vtbtn" id="vt-lista" onclick="setVista('listaview')" title="Lista"><i class="ti ti-list"></i></button>
+          </div>
+        </div>
+        <div class="filtros-row" id="filtros-row">
+          <button class="fbtn active" onclick="setFiltro('todos',this)">Todos</button>
+          <button class="fbtn estado-leido" onclick="setFiltro('leido',this)">✓ Leídos</button>
+          <button class="fbtn estado-leyendo" onclick="setFiltro('leyendo',this)">📖 Leyendo</button>
+          <button class="fbtn estado-noleido" onclick="setFiltro('noleido',this)">○ No leídos</button>
+        </div>
+      </div>
+      <div id="contenido-libros" class="estante-wrap"></div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="vista" id="tab-lista">
+      <div class="lista-wrap" id="lista-completa"></div>
+    </div>
+
+    <!-- PRÉSTAMOS -->
+    <div class="vista" id="tab-prestamos">
+      <div style="padding:12px 12px 90px">
+        <div class="sec-label">Libros que presté</div>
+        <div id="preste-lista"><div class="empty">Sin préstamos activos</div></div>
+        <div class="sec-label" style="margin-top:14px">Libros que me prestaron</div>
+        <div id="meprestaron-lista"><div class="empty">Sin libros prestados a vos</div></div>
+      </div>
+    </div>
+
+    <!-- DESEOS -->
+    <div class="vista" id="tab-deseos">
+      <div style="padding:12px 12px 90px">
+        <div class="sec-label">Lista de deseos · Libros</div>
+        <div id="deseos-lista"><div class="empty">Sin libros en lista de deseos</div></div>
+        <button class="add-btn" onclick="abrirNuevoDeseo()"><i class="ti ti-plus"></i> Agregar libro deseado</button>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="fab" onclick="abrirAgregar()">＋</button>
+
+  <!-- PANEL AGREGAR LIBRO -->
+  <div class="panel" id="panel-agregar">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-agregar')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Agregar libro</div>
+    </div>
+    <div class="panel-body">
+
+      <!-- ESCANEAR ISBN -->
+      <div style="background:#fdf5ee;border:0.5px solid var(--madera-light);border-radius:12px;padding:12px;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--madera-dark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📷 Escanear código de barras (ISBN)</div>
+
+        <!-- Opción 1: Foto del código de barras -->
+        <input type="file" id="scan-foto-inp" accept="image/*" capture="environment" style="display:none" onchange="procesarFotoISBN(this)">
+        <button class="btn" onclick="document.getElementById('scan-foto-inp').click()" style="background:var(--madera-dark);margin-bottom:8px">
+          <i class="ti ti-camera"></i> Fotografiar código de barras
+        </button>
+        <div id="scan-resultado" style="margin-bottom:8px"></div>
+
+        <div style="font-size:10px;color:var(--texto2);text-align:center;margin:6px 0">— o ingresá el ISBN manualmente —</div>
+        <div class="isbn-manual-row">
+          <input class="isbn-inp" type="text" id="isbn-inp" placeholder="Ej: 9789876283953" maxlength="13" inputmode="numeric">
+          <button class="isbn-btn" onclick="buscarISBN()">Buscar</button>
+        </div>
+        <div id="isbn-resultado"></div>
+      </div>
+
+      <!-- DATOS DEL LIBRO -->
+      <div style="font-size:10px;font-weight:700;color:var(--madera-dark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">✏️ Datos del libro</div>
+
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start">
+        <div class="cover-preview-wrap" id="cover-preview" onclick="document.getElementById('cover-file-inp').click()">
+          <span id="cover-emoji">📚</span>
+          <div class="cover-edit-hint">Tocar para cambiar</div>
+        </div>
+        <input type="file" id="cover-file-inp" accept="image/*" style="display:none" onchange="cargarPortadaManual(this)">
+        <div style="flex:1">
+          <div class="campo"><label>Título *</label><input id="l-titulo" placeholder="Título del libro"></div>
+          <div class="campo"><label>Autor/a *</label><input id="l-autor" placeholder="Apellido, Nombre"></div>
+        </div>
+      </div>
+
+      <input type="hidden" id="l-portada-url">
+      <input type="hidden" id="l-edit-id">
+
+      <div class="crow">
+        <div class="campo"><label>Año</label><input type="number" id="l-anio" placeholder="2024"></div>
+        <div class="campo"><label>Editorial</label><input id="l-editorial" placeholder="Editorial"></div>
+        <div class="campo cfull"><label>Género</label>
+          <input id="l-genero" placeholder="Novela, Psicología, Poesía..." list="generos-list">
+          <datalist id="generos-list">
+            <option value="Novela"><option value="Cuento"><option value="Poesía">
+            <option value="Psicología"><option value="Psicopedagogía"><option value="Educación">
+            <option value="Filosofía"><option value="Historia"><option value="Biografía">
+            <option value="Ciencia ficción"><option value="Fantasía"><option value="Thriller">
+            <option value="Romance"><option value="Ensayo"><option value="Autoayuda">
+            <option value="Neurociencias"><option value="Infantil"><option value="Juvenil">
+          </datalist>
+        </div>
+        <div class="campo cfull"><label>ISBN</label><input id="l-isbn" placeholder="9789876283953"></div>
+      </div>
+
+      <div style="font-size:9px;font-weight:700;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Estado de lectura</div>
+      <div class="estado-sel">
+        <button class="est-opt sel-leido" id="est-leido" onclick="setEstado('leido')">✓ Leído</button>
+        <button class="est-opt" id="est-leyendo" onclick="setEstado('leyendo')">📖 Leyendo</button>
+        <button class="est-opt" id="est-noleido" onclick="setEstado('noleido')">○ No leído</button>
+      </div>
+
+      <div class="campo"><label>Notas personales</label>
+        <textarea id="l-notas" placeholder="Tu opinión, frases favoritas, reflexiones..." style="min-height:60px;line-height:1.5;background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--texto);font-family:'Inter',sans-serif;width:100%;outline:none;resize:vertical"></textarea>
+      </div>
+
+      <button class="btn" onclick="guardarLibro()"><i class="ti ti-check"></i> Guardar en biblioteca</button>
+      <button class="btn-del" id="btn-del-libro" style="display:none" onclick="eliminarLibro()">Eliminar de la biblioteca</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-agregar')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL DETALLE LIBRO -->
+  <div class="panel" id="panel-detalle">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-detalle')"><i class="ti ti-arrow-left"></i> Biblioteca</button>
+      <div class="panel-titulo" id="det-titulo-header">—</div>
+    </div>
+    <div class="panel-body">
+      <div class="det-cover-wrap" id="det-cover-wrap">
+        <span class="det-cover-placeholder" id="det-cover-ph">📚</span>
+        <img id="det-cover-img" style="display:none" src="">
+        <button class="det-edit-cover" onclick="editarLibroActual()"><i class="ti ti-pencil"></i> Editar</button>
+      </div>
+      <div id="det-info"></div>
+
+      <div class="estado-sel" id="det-estado-sel" style="margin-top:10px">
+        <button class="est-opt" id="det-est-leido" onclick="cambiarEstado('leido')">✓ Leído</button>
+        <button class="est-opt" id="det-est-leyendo" onclick="cambiarEstado('leyendo')">📖 Leyendo</button>
+        <button class="est-opt" id="det-est-noleido" onclick="cambiarEstado('noleido')">○ No leído</button>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" onclick="abrirPrestar()" style="flex:1;background:#880e4f"><i class="ti ti-arrow-up-right"></i> Prestar</button>
+        <button class="btn" onclick="editarLibroActual()" style="flex:1;background:var(--madera)"><i class="ti ti-pencil"></i> Editar</button>
+      </div>
+      <button class="btn-del" onclick="eliminarLibroDetalle()">Eliminar de la biblioteca</button>
+    </div>
+  </div>
+
+  <!-- PANEL PRESTAR -->
+  <div class="panel" id="panel-prestar">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-prestar')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Prestar libro</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>¿A quién se lo prestás?</label><input id="pr-persona" placeholder="Nombre de la persona"></div>
+      <div class="campo"><label>Fecha de préstamo</label><input type="date" id="pr-fecha"></div>
+      <div class="campo"><label>Fecha de devolución estimada</label><input type="date" id="pr-devolucion"></div>
+      <button class="btn" onclick="guardarPrestamo()" style="background:#880e4f"><i class="ti ti-check"></i> Registrar préstamo</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-prestar')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVO DESEO -->
+  <div class="panel" id="panel-deseo">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-deseo')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Libro deseado</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>Título *</label><input id="d-titulo" placeholder="Título del libro"></div>
+      <div class="campo"><label>Autor/a</label><input id="d-autor" placeholder="Apellido, Nombre"></div>
+      <div class="campo"><label>ISBN (para buscar portada)</label>
+        <div class="isbn-manual-row" style="margin-bottom:0">
+          <input class="isbn-inp" type="text" id="d-isbn" placeholder="9789876283953">
+          <button class="isbn-btn" onclick="buscarISBNDeseo()">Buscar</button>
+        </div>
+      </div>
+      <input type="hidden" id="d-portada">
+      <div id="d-resultado"></div>
+      <div class="campo"><label>Notas / Por qué lo querés</label><input id="d-notas" placeholder="Recomendación, tema de interés..."></div>
+      <button class="btn" onclick="guardarDeseo()"><i class="ti ti-check"></i> Agregar a lista</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-deseo')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBbArs7ST8npvvklH_TyejLc_F1fU-IsOo",
+  authDomain: "metanoia-caro.firebaseapp.com",
+  projectId: "metanoia-caro",
+  storageBucket: "metanoia-caro.firebasestorage.app",
+  messagingSenderId: "241874727",
+  appId: "1:241874727:web:ac149b414b517019631b02",
+  databaseURL: "https://metanoia-caro-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ESTADO
+let libros = {}, prestamos = {}, deseos = {};
+let tabActual = 'estante', vistaActual = 'estante';
+let filtroActual = 'todos', busquedaActual = '';
+let estadoActual = 'leido';
+let libroDetalleActual = null;
+let scannerActivo = false;
+const COLORES = 12;
+
+const COLORES_LOMO = ['col-0','col-1','col-2','col-3','col-4','col-5','col-6','col-7','col-8','col-9','col-10','col-11'];
+
+// CARGAR
+db.ref('biblioteca/libros').on('value', s => { libros = s.val()||{}; renderTodo(); });
+db.ref('biblioteca/prestamos').on('value', s => { prestamos = s.val()||{}; renderPrestamos(); });
+db.ref('biblioteca/deseos').on('value', s => { deseos = s.val()||{}; renderDeseos(); });
+
+// TABS
+function setTab(t) {
+  tabActual = t;
+  ['estante','lista','prestamos','deseos'].forEach((x,i) => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.querySelectorAll('.itab')[i].classList.toggle('active', x===t);
+  });
+  if(t==='lista') renderLista();
+}
+
+// RENDER TODO
+function renderTodo() {
+  actualizarStats();
+  renderEstante();
+  renderLista();
+}
+
+function actualizarStats() {
+  const all = Object.values(libros);
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-leidos').textContent = all.filter(l=>l.estado==='leido').length;
+  document.getElementById('stat-leyendo').textContent = all.filter(l=>l.estado==='leyendo').length;
+  document.getElementById('stat-prestados').textContent = Object.values(prestamos).filter(p=>!p.devuelto).length;
+}
+
+function filtrarLibros() {
+  return Object.entries(libros).filter(([id,l]) => {
+    const matchFiltro = filtroActual==='todos' || l.estado===filtroActual;
+    const matchBusqueda = !busquedaActual ||
+      (l.titulo||'').toLowerCase().includes(busquedaActual.toLowerCase()) ||
+      (l.autor||'').toLowerCase().includes(busquedaActual.toLowerCase());
+    return matchFiltro && matchBusqueda;
+  });
+}
+
+// ESTANTE
+function renderEstante() {
+  const el = document.getElementById('contenido-libros');
+  const items = filtrarLibros();
+  if(!items.length) {
+    el.innerHTML = '<div class="empty">📚 Sin libros aún.<br>Tocá + para agregar el primero.</div>';
+    return;
+  }
+  if(vistaActual === 'grilla') { renderGrilla(items); return; }
+  if(vistaActual === 'listaview') { renderListaView(items); return; }
+
+  // Agrupar por género
+  const grupos = {};
+  items.forEach(([id,l]) => {
+    const g = l.genero || 'Sin categoría';
+    if(!grupos[g]) grupos[g] = [];
+    grupos[g].push([id,l]);
+  });
+
+  el.className = 'estante-wrap';
+  el.innerHTML = Object.entries(grupos).map(([genero, librosGenero]) => {
+    const lomos = librosGenero.map(([id,l], i) => {
+      const colorIdx = Math.abs(hashStr(l.autor||l.titulo||id)) % COLORES;
+      const prestado = Object.values(prestamos).some(p=>p.libro_id===id&&!p.devuelto);
+      const alt = Math.floor(Math.random()*30); // variación de altura
+      return `<div class="lomo ${COLORES_LOMO[colorIdx]} ${prestado?'prestado':''}"
+        style="height:${90+alt}px;width:${24+Math.floor(Math.random()*8)}px"
+        onclick="verDetalle('${id}')" title="${l.titulo}">
+        <div class="lomo-brillo"></div>
+        <div class="lomo-titulo">${l.titulo||'—'}</div>
+        <div class="lomo-sombra"></div>
+      </div>`;
+    }).join('');
+    return `<div class="estante-genero">
+      <div class="estante-label">${genero} <span>${librosGenero.length} libro${librosGenero.length!==1?'s':''}</span></div>
+      <div class="estante">${lomos}<div class="lomo-add" onclick="abrirAgregar()">+</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderGrilla(items) {
+  const el = document.getElementById('contenido-libros');
+  el.className = 'grilla-wrap';
+  el.innerHTML = items.map(([id,l]) => {
+    const estadoCls = l.estado==='leido'?'badge-leido':l.estado==='leyendo'?'badge-leyendo':'badge-noleido';
+    const estadoTxt = l.estado==='leido'?'✓ Leído':l.estado==='leyendo'?'Leyendo':'No leído';
+    const colorIdx = Math.abs(hashStr(l.autor||l.titulo||id)) % COLORES;
+    return `<div class="libro-card" onclick="verDetalle('${id}')">
+      <div class="libro-cover">
+        ${l.portada
+          ? `<img src="${l.portada}" alt="${l.titulo}" loading="lazy" onerror="this.parentElement.innerHTML='📚'">`
+          : `<div style="width:100%;height:100%;background:var(--fondo2);display:flex;align-items:center;justify-content:center;font-size:36px">📚</div>`}
+      </div>
+      <div class="libro-card-info">
+        <div class="libro-card-titulo">${l.titulo||'—'}</div>
+        <div class="libro-card-autor">${l.autor||''}</div>
+        <div style="margin-top:4px"><span class="estado-badge ${estadoCls}">${estadoTxt}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderListaView(items) {
+  const el = document.getElementById('contenido-libros');
+  el.className = 'lista-wrap';
+  el.innerHTML = items.map(([id,l]) => libroRowHTML(id,l)).join('');
+}
+
+function renderLista() {
+  const el = document.getElementById('lista-completa');
+  const items = filtrarLibros().sort((a,b)=>(a[1].autor||'').localeCompare(b[1].autor||''));
+  if(!items.length) { el.innerHTML='<div class="empty">Sin libros</div>'; return; }
+  el.innerHTML = items.map(([id,l]) => libroRowHTML(id,l)).join('');
+}
+
+function libroRowHTML(id,l) {
+  const estadoCls = l.estado==='leido'?'badge-leido':l.estado==='leyendo'?'badge-leyendo':'badge-noleido';
+  const estadoTxt = l.estado==='leido'?'✓ Leído':l.estado==='leyendo'?'📖 Leyendo':'○ No leído';
+  const prestado = Object.values(prestamos).some(p=>p.libro_id===id&&!p.devuelto);
+  return `<div class="libro-row" onclick="verDetalle('${id}')">
+    <div class="libro-row-cover">
+      ${l.portada
+        ? `<img src="${l.portada}" alt="${l.titulo}" onerror="this.parentElement.innerHTML='📚'">`
+        : '📚'}
+    </div>
+    <div class="libro-row-info">
+      <div class="libro-row-titulo">${l.titulo||'—'}</div>
+      <div class="libro-row-autor">${l.autor||''}</div>
+      <div class="libro-row-det">
+        <span class="estado-badge ${estadoCls}">${estadoTxt}</span>
+        ${l.genero?`<span style="font-size:9px;color:var(--texto2)">${l.genero}</span>`:''}
+        ${prestado?'<span class="estado-badge badge-prestado">↗ Prestado</span>':''}
+      </div>
+    </div>
+    <i class="ti ti-chevron-right" style="color:var(--borde);font-size:18px"></i>
+  </div>`;
+}
+
+function renderPrestamos() {
+  actualizarStats();
+  const preste = document.getElementById('preste-lista');
+  const meprest = document.getElementById('meprestaron-lista');
+  const prestados = Object.entries(prestamos).filter(([id,p])=>!p.devuelto&&p.tipo==='preste');
+  const meprestaron = Object.entries(prestamos).filter(([id,p])=>!p.devuelto&&p.tipo==='meprestaron');
+
+  if(!prestados.length) preste.innerHTML='<div class="empty">Sin préstamos activos</div>';
+  else preste.innerHTML = prestados.map(([id,p]) => {
+    const libro = libros[p.libro_id]||{};
+    const dias = p.devolucion ? Math.ceil((new Date(p.devolucion)-new Date())/(1000*60*60*24)) : null;
+    return `<div class="prestamo-card">
+      <div class="pr-titulo">${libro.titulo||p.titulo_manual||'—'}</div>
+      <div class="pr-persona">→ ${p.persona}</div>
+      <div class="pr-fecha">Desde: ${p.fecha||'—'} ${p.devolucion?'· Devolver: '+p.devolucion:''}</div>
+      ${dias!==null?`<div style="margin-top:4px"><span class="pr-dias">${dias>0?'En '+dias+' días':dias===0?'¡Hoy!':'Vencido hace '+Math.abs(dias)+' días'}</span></div>`:''}
+      <button onclick="marcarDevuelto('${id}')" style="background:var(--madera);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px">✓ Marcar como devuelto</button>
+    </div>`;
+  }).join('');
+
+  if(!meprestaron.length) meprest.innerHTML='<div class="empty">No tenés libros prestados de otros</div>';
+  else meprest.innerHTML = meprestaron.map(([id,p]) => `
+    <div class="prestamo-card" style="border-left-color:var(--madera)">
+      <div class="pr-titulo">${p.titulo_manual||'—'}</div>
+      <div class="pr-persona" style="color:var(--madera)">← De ${p.persona}</div>
+      <div class="pr-fecha">Desde: ${p.fecha||'—'}</div>
+      <button onclick="marcarDevuelto('${id}')" style="background:var(--madera);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px">✓ Lo devolví</button>
+    </div>`).join('');
+}
+
+function renderDeseos() {
+  const el = document.getElementById('deseos-lista');
+  const items = Object.entries(deseos);
+  if(!items.length) { el.innerHTML='<div class="empty">📚 Sin libros en lista de deseos</div>'; return; }
+  el.innerHTML = items.map(([id,d]) => `
+    <div class="deseo-libro">
+      <div class="dl-cover">
+        ${d.portada?`<img src="${d.portada}" onerror="this.parentElement.innerHTML='📚'" style="width:100%;height:100%;object-fit:cover">`:'📚'}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--texto)">${d.titulo||'—'}</div>
+        <div style="font-size:10px;color:var(--texto2);margin-top:2px">${d.autor||''}</div>
+        ${d.notas?`<div style="font-size:10px;color:var(--texto2);margin-top:4px">${d.notas}</div>`:''}
+        <button onclick="pasarABiblioteca('${id}')" style="background:var(--madera);color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:6px">+ Tengo este libro</button>
+      </div>
+      <button onclick="eliminarDeseo('${id}')" style="background:none;border:none;color:#ddd;font-size:16px;cursor:pointer"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+
+// DETALLE
+function verDetalle(id) {
+  const l = libros[id];
+  if(!l) return;
+  libroDetalleActual = id;
+  document.getElementById('det-titulo-header').textContent = l.titulo||'—';
+
+  // Portada
+  if(l.portada) {
+    document.getElementById('det-cover-img').src = l.portada;
+    document.getElementById('det-cover-img').style.display = 'block';
+    document.getElementById('det-cover-ph').style.display = 'none';
+  } else {
+    document.getElementById('det-cover-img').style.display = 'none';
+    document.getElementById('det-cover-ph').style.display = 'block';
+  }
+
+  // Info
+  document.getElementById('det-info').innerHTML = `
+    <div style="margin-bottom:10px">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--texto);margin-bottom:4px">${l.titulo||'—'}</div>
+      <div style="font-size:13px;color:var(--texto2);font-style:italic">${l.autor||''}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        ${l.genero?`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fdf5ee;color:var(--madera-dark)">${l.genero}</span>`:''}
+        ${l.anio?`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--fondo2);color:var(--texto2)">${l.anio}</span>`:''}
+        ${l.editorial?`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--fondo2);color:var(--texto2)">${l.editorial}</span>`:''}
+      </div>
+      ${l.notas?`<div style="margin-top:10px;padding:10px;background:var(--fondo2);border-radius:8px;font-size:12px;color:var(--texto);line-height:1.6;font-style:italic">"${l.notas}"</div>`:''}
+    </div>`;
+
+  // Estado
+  ['leido','leyendo','noleido'].forEach(e => {
+    const btn = document.getElementById('det-est-'+e);
+    btn.className = 'est-opt' + (l.estado===e?' sel-'+e:'');
+  });
+
+  document.getElementById('panel-detalle').classList.add('open');
+}
+
+async function cambiarEstado(estado) {
+  if(!libroDetalleActual) return;
+  await db.ref('biblioteca/libros/'+libroDetalleActual+'/estado').set(estado);
+  ['leido','leyendo','noleido'].forEach(e => {
+    document.getElementById('det-est-'+e).className = 'est-opt'+(e===estado?' sel-'+e:'');
+  });
+  toast('✓ Estado actualizado');
+}
+
+function editarLibroActual() {
+  cerrarPanel('panel-detalle');
+  const l = libros[libroDetalleActual];
+  if(!l) return;
+  setTimeout(() => {
+    limpiarFormLibro();
+    document.getElementById('l-edit-id').value = libroDetalleActual;
+    document.getElementById('l-titulo').value = l.titulo||'';
+    document.getElementById('l-autor').value = l.autor||'';
+    document.getElementById('l-anio').value = l.anio||'';
+    document.getElementById('l-editorial').value = l.editorial||'';
+    document.getElementById('l-genero').value = l.genero||'';
+    document.getElementById('l-isbn').value = l.isbn||'';
+    document.getElementById('l-notas').value = l.notas||'';
+    document.getElementById('l-portada-url').value = l.portada||'';
+    if(l.portada) {
+      const prev = document.getElementById('cover-preview');
+      prev.innerHTML = `<img src="${l.portada}" style="width:100%;height:100%;object-fit:cover"><div class="cover-edit-hint">Tocar para cambiar</div>`;
+    }
+    setEstado(l.estado||'noleido');
+    document.getElementById('btn-del-libro').style.display = 'block';
+    document.getElementById('panel-agregar').classList.add('open');
+  }, 250);
+}
+
+async function eliminarLibroDetalle() {
+  if(!libroDetalleActual||!confirm('¿Eliminar este libro?')) return;
+  await db.ref('biblioteca/libros/'+libroDetalleActual).remove();
+  cerrarPanel('panel-detalle');
+  toast('Libro eliminado');
+}
+
+// VISTA
+function setVista(v) {
+  vistaActual = v;
+  ['estante','grilla','listaview'].forEach(x => {
+    const btn = document.getElementById('vt-'+x);
+    if(btn) btn.classList.toggle('active', x===v);
+  });
+  renderEstante();
+}
+
+// FILTROS
+function setFiltro(f, btn) {
+  filtroActual = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEstante();
+  renderLista();
+}
+function buscar(v) { busquedaActual=v; renderEstante(); renderLista(); }
+
+// ESTADO FORM
+function setEstado(e) {
+  estadoActual = e;
+  ['leido','leyendo','noleido'].forEach(x => {
+    document.getElementById('est-'+x).className = 'est-opt'+(x===e?' sel-'+x:'');
+  });
+}
+
+// BUSCAR ISBN
+async function buscarISBN(isbn, elResultado, elPortada) {
+  const isbnVal = isbn || document.getElementById('isbn-inp').value.trim().replace(/[^0-9X]/gi,'');
+  const resEl = elResultado || document.getElementById('isbn-resultado');
+  if(!isbnVal || isbnVal.length < 10) { toast('⚠ Ingresá un ISBN válido'); return; }
+
+  resEl.innerHTML = '<div class="buscando"><div class="spin"></div><br>Buscando en Open Library...</div>';
+
+  try {
+    const r = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbnVal}&format=json&jscmd=data`);
+    const data = await r.json();
+    const key = `ISBN:${isbnVal}`;
+
+    if(!data[key]) {
+      resEl.innerHTML = '<div style="font-size:11px;color:#b85a5a;padding:8px">No se encontró este ISBN. Completá los datos manualmente.</div>';
+      return;
+    }
+
+    const libro = data[key];
+    const portada = libro.cover?.large || libro.cover?.medium || libro.cover?.small || '';
+    const titulo = libro.title || '';
+    const autores = libro.authors?.map(a=>a.name).join(', ') || '';
+    const anio = libro.publish_date || '';
+    const editorial = libro.publishers?.[0]?.name || '';
+    const generos = libro.subjects?.slice(0,3).map(s=>s.name).join(', ') || '';
+
+    // Llenar formulario
+    if(titulo) document.getElementById('l-titulo').value = titulo;
+    if(autores) document.getElementById('l-autor').value = autores;
+    if(anio) document.getElementById('l-anio').value = anio.replace(/\D/g,'').slice(0,4);
+    if(editorial) document.getElementById('l-editorial').value = editorial;
+    document.getElementById('l-isbn').value = isbnVal;
+
+    if(portada) {
+      document.getElementById('l-portada-url').value = portada;
+      const prev = document.getElementById('cover-preview');
+      prev.innerHTML = `<img src="${portada}" style="width:100%;height:100%;object-fit:cover"><div class="cover-edit-hint">Tocar para cambiar</div>`;
+    }
+
+    resEl.innerHTML = `<div class="libro-encontrado">
+      ${portada?`<img class="le-cover" src="${portada}" onerror="this.style.display='none'">`:'<span style="font-size:36px">📚</span>'}
+      <div class="le-info">
+        <div class="le-titulo">${titulo}</div>
+        <div class="le-autor">${autores}</div>
+        <div class="le-anio">${anio} ${editorial?'· '+editorial:''}</div>
+        <div style="font-size:9px;color:var(--madera);font-weight:700;margin-top:4px">✓ Datos cargados automáticamente</div>
+      </div>
+    </div>`;
+    toast('✓ Libro encontrado');
+  } catch(e) {
+    resEl.innerHTML = '<div style="font-size:11px;color:#b85a5a;padding:8px">Error al buscar. Verificá tu conexión.</div>';
+  }
+}
+
+// ESCÁNER: foto del código de barras + BarcodeDetector
+async function procesarFotoISBN(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const el = document.getElementById('scan-resultado');
+  el.innerHTML = '<div class="buscando"><div class="spin"></div><br>Detectando código...</div>';
+
+  try {
+    if('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','qr_code','code_128'] });
+      const img = await createImageBitmap(file);
+      const codes = await detector.detect(img);
+      if(codes.length > 0) {
+        const code = codes[0].rawValue;
+        document.getElementById('isbn-inp').value = code;
+        el.innerHTML = `<div style="font-size:11px;color:var(--madera-dark);font-weight:700;padding:6px">✓ Código detectado: ${code}</div>`;
+        buscarISBN();
+        return;
+      }
+    }
+    // Si no detectó, mostrar mensaje
+    el.innerHTML = '<div style="font-size:11px;color:#b85a5a;padding:6px">No se detectó el código. Ingresá el ISBN manualmente.</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:11px;color:#b85a5a;padding:6px">Error al procesar. Ingresá el ISBN manualmente.</div>';
+  }
+  input.value = '';
+}
+
+// PORTADA MANUAL
+function cargarPortadaManual(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxH = 400;
+      const ratio = maxH / img.height;
+      canvas.width = img.width * ratio;
+      canvas.height = maxH;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      document.getElementById('l-portada-url').value = dataUrl;
+      const prev = document.getElementById('cover-preview');
+      prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover"><div class="cover-edit-hint">Tocar para cambiar</div>`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// GUARDAR LIBRO
+async function guardarLibro() {
+  const titulo = document.getElementById('l-titulo').value.trim();
+  const autor = document.getElementById('l-autor').value.trim();
+  if(!titulo) { toast('⚠ Ingresá el título'); return; }
+
+  const data = {
+    titulo, autor,
+    anio: document.getElementById('l-anio').value,
+    editorial: document.getElementById('l-editorial').value,
+    genero: document.getElementById('l-genero').value,
+    isbn: document.getElementById('l-isbn').value,
+    notas: document.getElementById('l-notas').value,
+    portada: document.getElementById('l-portada-url').value,
+    estado: estadoActual,
+    creado: Date.now()
+  };
+
+  const editId = document.getElementById('l-edit-id').value;
+  if(editId) await db.ref('biblioteca/libros/'+editId).update(data);
+  else await db.ref('biblioteca/libros').push(data);
+
+  cerrarPanel('panel-agregar');
+  limpiarFormLibro();
+  toast('✓ Libro guardado en tu biblioteca');
+}
+
+async function eliminarLibro() {
+  const editId = document.getElementById('l-edit-id').value;
+  if(!editId||!confirm('¿Eliminar este libro?')) return;
+  await db.ref('biblioteca/libros/'+editId).remove();
+  cerrarPanel('panel-agregar');
+  toast('Libro eliminado');
+}
+
+function limpiarFormLibro() {
+  ['l-titulo','l-autor','l-anio','l-editorial','l-genero','l-isbn','l-notas','l-portada-url','l-edit-id'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('isbn-resultado').innerHTML='';
+  document.getElementById('isbn-inp').value='';
+  document.getElementById('cover-preview').innerHTML='<span id="cover-emoji">📚</span><div class="cover-edit-hint">Tocar para cambiar</div>';
+  document.getElementById('btn-del-libro').style.display='none';
+  setEstado('noleido');
+}
+
+function abrirAgregar() {
+  limpiarFormLibro();
+  document.getElementById('panel-agregar').classList.add('open');
+}
+
+// PRÉSTAMOS
+function abrirPrestar() {
+  document.getElementById('pr-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('panel-prestar').classList.add('open');
+}
+
+async function guardarPrestamo() {
+  const persona = document.getElementById('pr-persona').value.trim();
+  if(!persona||!libroDetalleActual) { toast('⚠ Ingresá el nombre'); return; }
+  await db.ref('biblioteca/prestamos').push({
+    libro_id: libroDetalleActual,
+    titulo_manual: libros[libroDetalleActual]?.titulo||'',
+    persona,
+    fecha: document.getElementById('pr-fecha').value,
+    devolucion: document.getElementById('pr-devolucion').value,
+    tipo: 'preste',
+    devuelto: false,
+    creado: Date.now()
+  });
+  cerrarPanel('panel-prestar');
+  cerrarPanel('panel-detalle');
+  toast('✓ Préstamo registrado');
+  document.getElementById('pr-persona').value='';
+}
+
+async function marcarDevuelto(id) {
+  await db.ref('biblioteca/prestamos/'+id+'/devuelto').set(true);
+  toast('✓ Marcado como devuelto');
+}
+
+// DESEOS
+function abrirNuevoDeseo() { document.getElementById('panel-deseo').classList.add('open'); }
+
+async function buscarISBNDeseo() {
+  const isbnVal = document.getElementById('d-isbn').value.trim();
+  if(!isbnVal) { toast('⚠ Ingresá un ISBN'); return; }
+  const el = document.getElementById('d-resultado');
+  el.innerHTML = '<div class="buscando"><div class="spin"></div><br>Buscando...</div>';
+  try {
+    const r = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbnVal}&format=json&jscmd=data`);
+    const data = await r.json();
+    const key = `ISBN:${isbnVal}`;
+    if(!data[key]) { el.innerHTML=''; return; }
+    const libro = data[key];
+    const portada = libro.cover?.medium || libro.cover?.small || '';
+    if(libro.title) document.getElementById('d-titulo').value = libro.title;
+    if(libro.authors?.length) document.getElementById('d-autor').value = libro.authors.map(a=>a.name).join(', ');
+    document.getElementById('d-portada').value = portada;
+    el.innerHTML = portada ? `<img src="${portada}" style="height:60px;border-radius:6px;margin-top:6px">` : '';
+    toast('✓ Encontrado');
+  } catch { el.innerHTML=''; }
+}
+
+async function guardarDeseo() {
+  const titulo = document.getElementById('d-titulo').value.trim();
+  if(!titulo) { toast('⚠ Ingresá el título'); return; }
+  await db.ref('biblioteca/deseos').push({
+    titulo,
+    autor: document.getElementById('d-autor').value,
+    isbn: document.getElementById('d-isbn').value,
+    portada: document.getElementById('d-portada').value,
+    notas: document.getElementById('d-notas').value,
+    creado: Date.now()
+  });
+  cerrarPanel('panel-deseo');
+  ['d-titulo','d-autor','d-isbn','d-notas','d-portada'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('d-resultado').innerHTML='';
+  toast('✓ Agregado a lista de deseos');
+}
+
+async function eliminarDeseo(id) { await db.ref('biblioteca/deseos/'+id).remove(); }
+
+async function pasarABiblioteca(id) {
+  const d = deseos[id];
+  if(!d) return;
+  await db.ref('biblioteca/libros').push({ titulo:d.titulo, autor:d.autor||'', portada:d.portada||'', estado:'noleido', creado:Date.now() });
+  await db.ref('biblioteca/deseos/'+id).remove();
+  toast('✓ Movido a tu biblioteca');
+}
+
+// UTILS
+function hashStr(str) {
+  let hash = 0;
+  for(let i=0;i<str.length;i++) hash = str.charCodeAt(i) + ((hash<<5)-hash);
+  return hash;
+}
+
+function cerrarPanel(id) {
+  document.getElementById(id).classList.remove('open');
+  if(id==='panel-agregar') { scannerActivo = false; }
+}
+
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
