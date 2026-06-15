@@ -260,6 +260,19 @@ body{font-family:'Inter',sans-serif}
     </div>
     <div class="pn-body">
       <div id="det-contenido"></div>
+
+      <!-- ASISTENCIA RÁPIDA -->
+      <div class="asist-wrap">
+        <div class="asist-titulo">¿Cómo fue la asistencia?</div>
+        <div class="asist-opts">
+          <button class="asist-btn asistio" id="ab-asistio" onclick="registrarAsistencia('asistio')">✓ Asistió</button>
+          <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')">✗ No avisó</button>
+          <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')">📅 Avisó con tiempo</button>
+          <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')">⏰ Avisó sobre la hora</button>
+        </div>
+        <div id="asist-guardada" style="display:none;margin-top:8px;text-align:center;font-size:11px;color:var(--trabajo-dark);font-weight:600">✓ Asistencia registrada</div>
+      </div>
+
       <button class="btn" onclick="location.href='pacientes.html'"><i class="ti ti-user"></i> Ver ficha del paciente</button>
       <button class="btn-del" onclick="eliminarTurno()">Eliminar turno</button>
       <button class="btn-out" onclick="cerrarDetalle()">Cerrar</button>
@@ -437,6 +450,15 @@ function renderDia() {
       let dot = colect ? 'var(--hogar)' : t.tipo === 'fijo' ? 'var(--trabajo)' : t.tipo === 'quinc' ? 'var(--yo)' : '#c8860b';
       let badge = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
       const horaFin = calcHoraFin(t.hora, t.duracion);
+      const asistBadge = t.asistencia ? 
+      `<span class="asist-badge ab-${t.asistencia}">${
+        t.asistencia==='asistio'?'✓ Asistió':
+        t.asistencia==='no-aviso'?'✗ No avisó':
+        t.asistencia==='aviso-tiempo'?'📅 Avisó':
+        t.asistencia==='aviso-hora'?'⏰ Sobre la hora':'?'
+      }</span>` : 
+      `<span class="asist-badge ab-pendiente">Sin registrar</span>`;
+      
       return `<div class="hora-row">
         <div class="hora-lbl">${t.hora||'—'}</div>
         <div class="hora-line"></div>
@@ -446,6 +468,7 @@ function renderDia() {
             <div class="td-info">
               <div class="td-nombre">${t.paciente_nombre||'—'}</div>
               <div class="td-det">${t.hora||'—'} – ${horaFin} · ${t.duracion||50} min · ${t.modalidad||'OS'}${colect ? ' · 🤝' : ''}</div>
+              <div style="margin-top:4px">${asistBadge}</div>
             </div>
             <div class="td-badge" style="background:${bg};color:${dot}">${badge}</div>
           </div>
@@ -519,6 +542,21 @@ function abrirDetalle(id) {
   const t = turnos[id];
   if (!t) return;
   turnoActualId = id;
+  
+  // Mostrar asistencia guardada si existe
+  const asistEl = document.getElementById('asist-guardada');
+  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora'];
+  opts.forEach(o => {
+    const btn = document.getElementById('ab-'+o);
+    if(btn) btn.classList.remove('sel');
+  });
+  if(t.asistencia) {
+    const btn = document.getElementById('ab-'+t.asistencia);
+    if(btn) btn.classList.add('sel');
+    if(asistEl) asistEl.style.display = 'block';
+  } else {
+    if(asistEl) asistEl.style.display = 'none';
+  }
   const p = pacientes[t.paciente_id] || {};
   document.getElementById('det-pac-nombre').textContent = t.paciente_nombre || '—';
   const tipLabel = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
@@ -541,6 +579,25 @@ function abrirDetalle(id) {
 }
 
 function cerrarDetalle() { document.getElementById('panel-detalle').classList.remove('open'); turnoActualId = null; }
+
+async function registrarAsistencia(tipo) {
+  if(!turnoActualId) return;
+  await db.ref('turnos/' + turnoActualId + '/asistencia').set(tipo);
+  
+  // Actualizar UI
+  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora'];
+  opts.forEach(o => {
+    const btn = document.getElementById('ab-'+o);
+    if(btn) btn.classList.toggle('sel', o===tipo);
+  });
+  document.getElementById('asist-guardada').style.display = 'block';
+  
+  // Guardar timestamp para saber cuándo se registró
+  await db.ref('turnos/' + turnoActualId + '/asistencia_fecha').set(new Date().toISOString().split('T')[0]);
+  
+  toast(tipo === 'asistio' ? '✓ Asistencia registrada' : '✓ Falta registrada');
+  renderVista();
+}
 
 async function eliminarTurno() {
   if (!turnoActualId) return;

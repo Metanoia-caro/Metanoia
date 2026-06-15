@@ -230,6 +230,16 @@ body { font-family: 'Inter', sans-serif; }
 .campo-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
 
 /* ===== UTILIDADES ===== */
+/* AVISO ASISTENCIA */
+.aviso-asist { background: linear-gradient(135deg, #ff9800, #e65100); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; display: none; cursor: pointer; }
+.aviso-asist.show { display: block; }
+.aviso-asist-titulo { font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.aviso-asist-lista { display: flex; flex-direction: column; gap: 4px; }
+.aviso-asist-item { background: rgba(255,255,255,0.15); border-radius: 7px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.aviso-asist-nombre { font-size: 11px; font-weight: 600; color: #fff; flex: 1; }
+.aviso-asist-hora { font-size: 10px; color: rgba(255,255,255,0.8); }
+.aviso-asist-btn { background: rgba(255,255,255,0.25); border: none; border-radius: 6px; padding: 4px 10px; font-size: 10px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+
 .fab { position: fixed; bottom: 80px; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--hogar); border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(86,17,43,0.35); z-index: 15; }
 .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--trabajo); display: inline-block; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -322,6 +332,10 @@ body { font-family: 'Inter', sans-serif; }
       <div class="section-content active" id="sec-trabajo">
 
         <div class="sec-label">Agenda de hoy</div>
+        <div class="aviso-asist" id="aviso-asist" onclick="location.href='agenda.html'">
+          <div class="aviso-asist-titulo">⏰ Turnos sin registrar asistencia</div>
+          <div class="aviso-asist-lista" id="aviso-asist-lista"></div>
+        </div>
         <div id="agenda-hoy-list">
           <div class="empty-state"><div class="emoji">📅</div>Cargando turnos...</div>
         </div>
@@ -785,6 +799,47 @@ function actualizarPeso(val) {
 }
 window.actualizarPeso = actualizarPeso;
 
+// ===== VERIFICAR ASISTENCIAS PENDIENTES =====
+function verificarAsistenciasPendientes(turnos) {
+  const hoy = new Date();
+  const hoyStr = hoy.toISOString().split('T')[0];
+  const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const diaHoy = diasSemana[hoy.getDay()];
+  
+  // Filtrar turnos de hoy que ya pasaron (más de 30 min) y no tienen asistencia
+  const pendientes = Object.entries(turnos).filter(([id, t]) => {
+    const esHoy = t.dia === diaHoy || t.fecha === hoyStr;
+    if(!esHoy) return false;
+    if(t.asistencia) return false; // ya registrado
+    // Verificar si ya pasó la hora del turno + 30 min
+    if(t.hora) {
+      const [h, m] = t.hora.split(':').map(Number);
+      const horaT = new Date();
+      horaT.setHours(h, m + 30, 0);
+      return hoy > horaT;
+    }
+    return false;
+  });
+
+  const aviso = document.getElementById('aviso-asist');
+  const lista = document.getElementById('aviso-asist-lista');
+  
+  if(pendientes.length === 0) {
+    if(aviso) aviso.classList.remove('show');
+    return;
+  }
+
+  if(aviso) aviso.classList.add('show');
+  if(lista) {
+    lista.innerHTML = pendientes.map(([id, t]) => `
+      <div class="aviso-asist-item">
+        <span class="aviso-asist-nombre">${t.paciente_nombre || t.paciente || '—'}</span>
+        <span class="aviso-asist-hora">${t.hora || ''}</span>
+        <button class="aviso-asist-btn" onclick="event.stopPropagation();location.href='agenda.html'">Registrar →</button>
+      </div>`).join('');
+  }
+}
+
 // ===== GYM =====
 let gymHoy = false;
 function toggleGymHoy() {
@@ -866,6 +921,7 @@ function cargarDatosHoy() {
     const diaHoy = diasSemana[new Date().getDay()];
     const turnosHoy = Object.entries(turnos).filter(([k,v]) => v.dia === diaHoy || v.fecha === hoy);
     document.getElementById('res-turnos').querySelector('.res-mini-num').textContent = turnosHoy.length;
+    verificarAsistenciasPendientes(turnos);
     const subEl = document.getElementById('saludo-sub');
     if(subEl) subEl.textContent = turnosHoy.length > 0 ? `${turnosHoy.length} turno${turnosHoy.length>1?'s':''} hoy` : 'sin turnos hoy';
 
