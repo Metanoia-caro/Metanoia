@@ -269,6 +269,7 @@ body{font-family:'Inter',sans-serif}
           <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')">✗ No avisó</button>
           <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')">📅 Avisó con tiempo</button>
           <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')">⏰ Avisó sobre la hora</button>
+          <button class="asist-btn feriado" id="ab-feriado" onclick="registrarAsistencia('feriado')" style="grid-column:1/-1">🗓️ Feriado / No hubo sesión</button>
         </div>
         <div id="asist-guardada" style="display:none;margin-top:8px;text-align:center;font-size:11px;color:var(--trabajo-dark);font-weight:600">✓ Asistencia registrada</div>
       </div>
@@ -455,7 +456,7 @@ function renderDia() {
         t.asistencia==='asistio'?'✓ Asistió':
         t.asistencia==='no-aviso'?'✗ No avisó':
         t.asistencia==='aviso-tiempo'?'📅 Avisó':
-        t.asistencia==='aviso-hora'?'⏰ Sobre la hora':'?'
+        t.asistencia==='aviso-hora'?'⏰ Sobre la hora':t.asistencia==='feriado'?'🗓️ Feriado':'?'
       }</span>` : 
       `<span class="asist-badge ab-pendiente">Sin registrar</span>`;
       
@@ -545,7 +546,7 @@ function abrirDetalle(id) {
   
   // Mostrar asistencia guardada si existe
   const asistEl = document.getElementById('asist-guardada');
-  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora'];
+  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
   opts.forEach(o => {
     const btn = document.getElementById('ab-'+o);
     if(btn) btn.classList.remove('sel');
@@ -585,7 +586,7 @@ async function registrarAsistencia(tipo) {
   await db.ref('turnos/' + turnoActualId + '/asistencia').set(tipo);
   
   // Actualizar UI
-  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora'];
+  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
   opts.forEach(o => {
     const btn = document.getElementById('ab-'+o);
     if(btn) btn.classList.toggle('sel', o===tipo);

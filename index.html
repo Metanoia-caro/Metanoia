@@ -810,7 +810,7 @@ function verificarAsistenciasPendientes(turnos) {
   const pendientes = Object.entries(turnos).filter(([id, t]) => {
     const esHoy = t.dia === diaHoy || t.fecha === hoyStr;
     if(!esHoy) return false;
-    if(t.asistencia) return false; // ya registrado
+    if(t.asistencia) return false; // ya registrado (incluye feriado)
     // Verificar si ya pasó la hora del turno + 30 min
     if(t.hora) {
       const [h, m] = t.hora.split(':').map(Number);
