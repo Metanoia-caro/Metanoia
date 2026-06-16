@@ -51,6 +51,124 @@ body { font-family: 'Inter', sans-serif; }
   position: relative;
 }
 
+/* ===== ESCRITORIO ===== */
+@media (min-width: 768px) {
+  html, body { background: #1a0010; overflow: auto; }
+  
+  .desktop-layout {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  /* Sidebar */
+  .desktop-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+  }
+  .sidebar-logo {
+    background: linear-gradient(160deg, var(--hogar), #1a0010);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 8px;
+  }
+  .sidebar-logo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .sidebar-logo-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    margin-top: 2px;
+  }
+  .sidebar-logo-date {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+  }
+  .sidebar-nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    transition: all .15s;
+    text-decoration: none;
+    width: 100%;
+    text-align: left;
+  }
+  .sidebar-nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .sidebar-nav-btn.active { background: var(--hogar); color: #fff; border-color: var(--hogar); }
+  .sidebar-nav-btn .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+  .sidebar-lock-btn {
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+    width: 100%;
+  }
+  .sidebar-lock-btn:hover { color: rgba(255,255,255,0.7); }
+
+  /* App principal más ancha */
+  .app {
+    flex: 1;
+    max-width: 100%;
+    height: auto;
+    min-height: calc(100vh - 40px);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+
+  /* Ocultar barra inferior en escritorio */
+  .bottom-bar { display: none !important; }
+
+  /* Cover más compacto */
+  .cover { padding-top: 30px; }
+
+  /* Secciones con más espacio */
+  .section-content { padding: 16px 20px 40px; }
+
+  /* Pestañas más grandes */
+  .stab { padding: 10px 8px 8px; }
+  .stab-icon { font-size: 22px; }
+  .stab-label { font-size: 9px; }
+
+  /* Grilla yo en 4 columnas */
+  .yo-cards { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+
+  /* Hogar cards en 4 columnas */
+  .hogar-cards { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+}
+
 /* ===== PANTALLA PIN ===== */
 #pin-screen {
   position: absolute; inset: 0; z-index: 200;
@@ -254,7 +372,37 @@ body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="desktop-layout" id="desktop-layout" style="display:none">
+  <!-- SIDEBAR ESCRITORIO -->
+  <div class="desktop-sidebar" id="desktop-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">🌸 Metanoia</div>
+      <div class="sidebar-logo-sub">Tu espacio completo, Caro</div>
+      <div class="sidebar-logo-date" id="sidebar-date"></div>
+    </div>
+    <button class="sidebar-nav-btn active" id="snav-trabajo" onclick="setSection('trabajo');setSidebarActive('trabajo')">
+      <span class="nav-icon">💼</span> Trabajo
+    </button>
+    <button class="sidebar-nav-btn" id="snav-hogar" onclick="setSection('hogar');setSidebarActive('hogar')">
+      <span class="nav-icon">🏡</span> Hogar
+    </button>
+    <button class="sidebar-nav-btn" id="snav-yo" onclick="setSection('yo');setSidebarActive('yo')">
+      <span class="nav-icon">🌸</span> Yo
+    </button>
+    <hr style="border:none;border-top:0.5px solid rgba(255,255,255,0.08);margin:4px 0">
+    <a class="sidebar-nav-btn" href="agenda.html"><span class="nav-icon">📅</span> Agenda</a>
+    <a class="sidebar-nav-btn" href="pacientes.html"><span class="nav-icon">👤</span> Pacientes</a>
+    <a class="sidebar-nav-btn" href="cobros.html"><span class="nav-icon">💰</span> Cobros</a>
+    <a class="sidebar-nav-btn" href="finanzas.html"><span class="nav-icon">📊</span> Finanzas</a>
+    <a class="sidebar-nav-btn" href="obras.html"><span class="nav-icon">🏥</span> Obras sociales</a>
+    <a class="sidebar-nav-btn" href="fadycc.html"><span class="nav-icon">🎓</span> FADYCC</a>
+    <a class="sidebar-nav-btn" href="hogar.html"><span class="nav-icon">🛒</span> Lista compras</a>
+    <a class="sidebar-nav-btn" href="yo.html"><span class="nav-icon">✨</span> Hábitos y yo</a>
+    <a class="sidebar-nav-btn" href="biblioteca.html"><span class="nav-icon">📚</span> Biblioteca</a>
+    <button class="sidebar-lock-btn" onclick="bloquear()">🔒 Bloquear</button>
+  </div>
+  <!-- APP -->
+  <div class="app" id="app-wrapper">
 
   <!-- LOADING -->
   <div id="loading-screen">
@@ -618,6 +766,34 @@ let vasosLlenos = 0;
 let totalVasos = 5;
 
 // ===== INICIALIZACIÓN =====
+// ===== DETECTAR ESCRITORIO =====
+function detectarEscritorio() {
+  const esEscritorio = window.innerWidth >= 768;
+  const layout = document.getElementById('desktop-layout');
+  const app = document.getElementById('app-wrapper') || document.querySelector('.app');
+  
+  if(esEscritorio && layout) {
+    layout.style.display = 'flex';
+    // Actualizar fecha en sidebar
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const hoy = new Date();
+    const sdEl = document.getElementById('sidebar-date');
+    if(sdEl) sdEl.textContent = `${dias[hoy.getDay()]} ${hoy.getDate()} de ${meses[hoy.getMonth()]}`;
+  } else if(layout) {
+    layout.style.display = 'none';
+  }
+}
+
+function setSidebarActive(seccion) {
+  document.querySelectorAll('.sidebar-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('snav-'+seccion);
+  if(btn) btn.classList.add('active');
+}
+
+window.addEventListener('resize', detectarEscritorio);
+detectarEscritorio();
+
 function iniciarApp() {
   setTimeout(() => {
     document.getElementById('loading-screen').style.display = 'none';
@@ -696,6 +872,7 @@ function desbloquear() {
   pinIngresado = '';
   actualizarDots();
   cargarDatosHoy();
+  detectarEscritorio();
 }
 
 function bloquear() {

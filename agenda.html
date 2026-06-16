@@ -130,6 +130,22 @@ body{font-family:'Inter',sans-serif}
 .panel-detalle{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
 .panel-detalle.open{display:flex}
 </style>
+
+<style>
+@media (min-width: 768px) {
+  html, body { background: #1a0010; overflow: auto; }
+  .app { max-width: 900px !important; height: auto !important; min-height: 100vh; margin: 0 auto; }
+  .body { height: auto !important; overflow: visible !important; }
+  .vista { height: auto !important; }
+  .vista.active, .section-content.active { display: block !important; }
+  .bottom-bar { display: none !important; }
+  .inner-tabs { position: sticky; top: 0; z-index: 10; }
+  .cover { padding-top: 32px !important; }
+  .fab { bottom: 24px !important; }
+  .toast { bottom: 24px !important; }
+  .panel, .vista-panel { max-width: 900px !important; }
+}
+</style>
 </head>
 <body>
 <div class="app">
