@@ -607,7 +607,7 @@ function cargarSesiones(pid) {
   });
 }
 
-function toggleSF() { document.getElementById('nf').classList.toggle('open'); if (document.getElementById('nf').classList.contains('open')) document.getElementById('s-f').value = new Date().toISOString().split('T')[0]; }
+function toggleSF() { document.getElementById('nf').classList.toggle('open'); if (document.getElementById('nf').classList.contains('open')) document.getElementById('s-f').value = new Date().toLocaleDateString('en-CA'); }
 async function guardarSesion() {
   if (!pidActual) return;
   const s = { fecha: document.getElementById('s-f').value, num: document.getElementById('s-n').value, obj: document.getElementById('s-ob').value, notas: document.getElementById('s-no').value, tarea: document.getElementById('s-ta').value, fin: document.getElementById('s-fin').value, ts: Date.now() };
@@ -635,7 +635,7 @@ function renderCobros() {
 async function togglePago(mes) {
   if (!pidActual) return;
   const actual = pacs[pidActual]?.cobros?.[mes]?.pagado || false;
-  await db.ref('pacientes/' + pidActual + '/cobros/' + mes).set({ pagado: !actual, fecha: new Date().toISOString().split('T')[0] });
+  await db.ref('pacientes/' + pidActual + '/cobros/' + mes).set({ pagado: !actual, fecha: new Date().toLocaleDateString('en-CA') });
   toast(!actual ? '✓ Marcado como pagado' : 'Marcado como pendiente');
 }
 

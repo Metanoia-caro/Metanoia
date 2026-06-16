@@ -263,15 +263,23 @@ body{font-family:'Inter',sans-serif}
 
       <!-- ASISTENCIA RÁPIDA -->
       <div class="asist-wrap">
-        <div class="asist-titulo">¿Cómo fue la asistencia?</div>
-        <div class="asist-opts">
-          <button class="asist-btn asistio" id="ab-asistio" onclick="registrarAsistencia('asistio')">✓ Asistió</button>
-          <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')">✗ No avisó</button>
-          <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')">📅 Avisó con tiempo</button>
-          <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')">⏰ Avisó sobre la hora</button>
-          <button class="asist-btn feriado" id="ab-feriado" onclick="registrarAsistencia('feriado')" style="grid-column:1/-1">🗓️ Feriado / No hubo sesión</button>
+        <div class="asist-header" onclick="toggleAsist()">
+          <div class="asist-header-left">
+            <span class="asist-header-icon">📋</span>
+            <span class="asist-header-txt">Registrar asistencia</span>
+            <span class="asist-header-badge ab-pendiente" id="asist-badge-header">Sin registrar</span>
+          </div>
+          <i class="ti ti-chevron-right asist-chevron" id="asist-chevron"></i>
         </div>
-        <div id="asist-guardada" style="display:none;margin-top:8px;text-align:center;font-size:11px;color:var(--trabajo-dark);font-weight:600">✓ Asistencia registrada</div>
+        <div class="asist-body" id="asist-body">
+          <div class="asist-opts">
+            <button class="asist-btn asistio" id="ab-asistio" onclick="registrarAsistencia('asistio')">✅ Asistió</button>
+            <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')">📅 Faltó — avisó con tiempo</button>
+            <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')">⏰ Faltó — avisó sobre la hora</button>
+            <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')">❌ Faltó — no avisó</button>
+            <button class="asist-btn feriado" id="ab-feriado" onclick="registrarAsistencia('feriado')">🗓️ Feriado / No hubo sesión</button>
+          </div>
+        </div>
       </div>
 
       <button class="btn" onclick="location.href='pacientes.html'"><i class="ti ti-user"></i> Ver ficha del paciente</button>
@@ -305,6 +313,11 @@ let fechaBase = new Date();
 let turnos = {};
 let pacientes = {};
 let turnoActualId = null;
+
+function fechaLocal(d) {
+  const dt = d || new Date();
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
 
 const DIAS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
 const DIAS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -377,7 +390,7 @@ function renderSemana() {
 
   // Grid
   document.getElementById('semana-grid').innerHTML = dias.map(d => {
-    const fechaStr = d.toISOString().split('T')[0];
+    const fechaStr = fechaLocal(d);
     const diaStr = DIAS[d.getDay()];
     const turnosDia = Object.entries(turnos).filter(([id, t]) => {
       if (t.tipo === 'eval') return t.fecha === fechaStr;
@@ -416,7 +429,7 @@ function renderSemana() {
 // RENDER DÍA
 function renderDia() {
   const hoy = fechaBase;
-  const fechaStr = hoy.toISOString().split('T')[0];
+  const fechaStr = fechaLocal(hoy);
   const diaStr = DIAS[hoy.getDay()];
   const diaLabel = `${DIAS_SHORT[hoy.getDay()]} ${hoy.getDate()} de ${MESES[hoy.getMonth()]} · ${hoy.getFullYear()}`;
 
@@ -494,7 +507,7 @@ function calcHoraFin(hora, mins) {
 
 // NUEVO TURNO
 function abrirNuevo() {
-  document.getElementById('nt-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('nt-fecha').value = fechaLocal();
   document.getElementById('panel-nuevo').classList.add('open');
 }
 
@@ -544,20 +557,22 @@ function abrirDetalle(id) {
   if (!t) return;
   turnoActualId = id;
   
-  // Mostrar asistencia guardada si existe
-  const asistEl = document.getElementById('asist-guardada');
+  // Actualizar badge de asistencia
+  actualizarBadgeAsist(t.asistencia || null);
   const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
   opts.forEach(o => {
     const btn = document.getElementById('ab-'+o);
-    if(btn) btn.classList.remove('sel');
+    if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); }
   });
   if(t.asistencia) {
     const btn = document.getElementById('ab-'+t.asistencia);
-    if(btn) btn.classList.add('sel');
-    if(asistEl) asistEl.style.display = 'block';
-  } else {
-    if(asistEl) asistEl.style.display = 'none';
+    if(btn) { btn.classList.add('sel', t.asistencia); }
   }
+  // Cerrar acordeón al abrir detalle
+  const body = document.getElementById('asist-body');
+  const chev = document.getElementById('asist-chevron');
+  if(body) body.classList.remove('open');
+  if(chev) chev.classList.remove('open');
   const p = pacientes[t.paciente_id] || {};
   document.getElementById('det-pac-nombre').textContent = t.paciente_nombre || '—';
   const tipLabel = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
@@ -581,22 +596,46 @@ function abrirDetalle(id) {
 
 function cerrarDetalle() { document.getElementById('panel-detalle').classList.remove('open'); turnoActualId = null; }
 
+function toggleAsist() {
+  const body = document.getElementById('asist-body');
+  const chev = document.getElementById('asist-chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function actualizarBadgeAsist(tipo) {
+  const badge = document.getElementById('asist-badge-header');
+  if(!badge) return;
+  const labels = {
+    'asistio': ['ab-asistio', '✓ Asistió'],
+    'aviso-tiempo': ['ab-aviso-tiempo', '📅 Avisó con tiempo'],
+    'aviso-hora': ['ab-aviso-hora', '⏰ Avisó sobre la hora'],
+    'no-aviso': ['ab-no-aviso', '❌ No avisó'],
+    'feriado': ['ab-feriado', '🗓️ Feriado'],
+  };
+  const info = labels[tipo] || ['ab-pendiente', 'Sin registrar'];
+  badge.className = 'asist-header-badge ' + info[0];
+  badge.textContent = info[1];
+}
+
 async function registrarAsistencia(tipo) {
   if(!turnoActualId) return;
   await db.ref('turnos/' + turnoActualId + '/asistencia').set(tipo);
+  await db.ref('turnos/' + turnoActualId + '/asistencia_fecha').set(fechaLocal());
   
-  // Actualizar UI
+  // Actualizar botones
   const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
   opts.forEach(o => {
     const btn = document.getElementById('ab-'+o);
-    if(btn) btn.classList.toggle('sel', o===tipo);
+    if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); btn.classList.toggle('sel', o===tipo); if(o===tipo) btn.classList.add(o); }
   });
-  document.getElementById('asist-guardada').style.display = 'block';
   
-  // Guardar timestamp para saber cuándo se registró
-  await db.ref('turnos/' + turnoActualId + '/asistencia_fecha').set(new Date().toISOString().split('T')[0]);
+  // Actualizar badge del header y cerrar
+  actualizarBadgeAsist(tipo);
+  document.getElementById('asist-body').classList.remove('open');
+  document.getElementById('asist-chevron').classList.remove('open');
   
-  toast(tipo === 'asistio' ? '✓ Asistencia registrada' : '✓ Falta registrada');
+  toast(tipo === 'asistio' ? '✓ Asistencia registrada' : tipo === 'feriado' ? '🗓️ Feriado registrado' : '✓ Falta registrada');
   renderVista();
 }
 

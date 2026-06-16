@@ -384,7 +384,7 @@ function toggleDet(detId, arrId) {
 
 async function togglePago(mesKey, pacId, actual) {
   await db.ref(`cobros/${mesKey}/${pacId}/pagado`).set(!actual);
-  if (!actual) await db.ref(`cobros/${mesKey}/${pacId}/fecha_cobro`).set(new Date().toISOString().split('T')[0]);
+  if (!actual) await db.ref(`cobros/${mesKey}/${pacId}/fecha_cobro`).set(new Date().toLocaleDateString('en-CA'));
   toast(!actual ? '✓ Marcado como pagado' : 'Marcado como pendiente');
 }
 
@@ -516,7 +516,7 @@ async function eliminarArancel(id) {
 function abrirNuevoArancel() {
   const f = document.getElementById('nuevo-arancel-form');
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  document.getElementById('na-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('na-fecha').value = new Date().toLocaleDateString('en-CA');
 }
 
 async function guardarNuevoArancel() {

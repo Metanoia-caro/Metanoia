@@ -855,13 +855,15 @@ window.toggleGymHoy = toggleGymHoy;
 // ===== FIREBASE — DATOS =====
 function guardarHabito(tipo, valor) {
   if (!window.db) return;
-  const hoy = new Date().toISOString().split('T')[0];
+  const _hoyD = new Date();
+  const hoy = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,'0')}-${String(_hoyD.getDate()).padStart(2,'0')}`;
   window.dbSet(window.dbRef(window.db, `habitos/${hoy}/${tipo}`), valor);
 }
 
 function cargarDatosHoy() {
   if (!window.db) return;
-  const hoy = new Date().toISOString().split('T')[0];
+  const _hoyD = new Date();
+  const hoy = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,'0')}-${String(_hoyD.getDate()).padStart(2,'0')}`;
 
   // Actualizar saludo dinámico
   const hora = new Date().getHours();
