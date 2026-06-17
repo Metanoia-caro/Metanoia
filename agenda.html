@@ -129,6 +129,33 @@ body{font-family:'Inter',sans-serif}
 /* DETALLE TURNO */
 .panel-detalle{display:none;position:fixed;inset:0;background:var(--fondo);z-index:100;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden}
 .panel-detalle.open{display:flex}
+
+/* ASISTENCIA */
+.asist-wrap{background:#fff;border:0.5px solid var(--borde);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.asist-header{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;cursor:pointer;user-select:none}
+.asist-header-left{display:flex;align-items:center;gap:8px}
+.asist-header-icon{font-size:16px}
+.asist-header-txt{font-size:12px;font-weight:600;color:var(--texto)}
+.asist-header-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px}
+.asist-chevron{font-size:16px;color:var(--borde);transition:transform .2s}
+.asist-chevron.open{transform:rotate(90deg)}
+.asist-body{display:none;border-top:0.5px solid var(--borde);padding:10px 12px}
+.asist-body.open{display:block}
+.asist-opts{display:flex;flex-direction:column;gap:5px}
+.asist-btn{padding:10px 14px;border-radius:8px;border:0.5px solid var(--borde);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;background:#fff;color:var(--texto);display:flex;align-items:center;gap:8px;transition:all .15s;width:100%}
+.asist-btn:hover{background:var(--fondo2)}
+.asist-btn.sel.asistio{background:#d6f0e8;border-color:#4caf50;color:#1a5a3a}
+.asist-btn.sel.aviso-tiempo{background:#fff3e0;border-color:#ff9800;color:#7a4010}
+.asist-btn.sel.aviso-hora{background:#fff3e0;border-color:#e65100;color:#a05010}
+.asist-btn.sel.no-aviso{background:#fde8e8;border-color:#e94560;color:#9a2a2a}
+.asist-btn.sel.feriado{background:#e8eaf6;border-color:#3949ab;color:#3949ab}
+.ab-asistio{background:#d6f0e8;color:#1a5a3a}
+.ab-aviso-tiempo{background:#fff3e0;color:#7a4010}
+.ab-aviso-hora{background:#fff3e0;color:#a05010}
+.ab-no-aviso{background:#fde8e8;color:#9a2a2a}
+.ab-pendiente{background:var(--fondo2);color:var(--texto2)}
+.ab-feriado{background:#e8eaf6;color:#3949ab}
+.asist-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px}
 </style>
 
 <style>
@@ -279,21 +306,21 @@ body{font-family:'Inter',sans-serif}
 
       <!-- ASISTENCIA RÁPIDA -->
       <div class="asist-wrap">
-        <div class="asist-header" onclick="toggleAsist()">
-          <div class="asist-header-left">
-            <span class="asist-header-icon">📋</span>
-            <span class="asist-header-txt">Registrar asistencia</span>
-            <span class="asist-header-badge ab-pendiente" id="asist-badge-header">Sin registrar</span>
+        <div onclick="toggleAsist()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 13px;cursor:pointer;user-select:none">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">📋</span>
+            <span style="font-size:12px;font-weight:600;color:var(--texto)">Registrar asistencia</span>
+            <span id="asist-badge-header" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--fondo2);color:var(--texto2)">Sin registrar</span>
           </div>
-          <i class="ti ti-chevron-right asist-chevron" id="asist-chevron"></i>
+          <i class="ti ti-chevron-right" id="asist-chevron" style="font-size:16px;color:var(--borde);transition:transform .2s"></i>
         </div>
-        <div class="asist-body" id="asist-body">
+        <div id="asist-body" style="display:none;border-top:0.5px solid var(--borde);padding:10px 12px">
           <div class="asist-opts">
-            <button class="asist-btn asistio" id="ab-asistio" onclick="registrarAsistencia('asistio')">✅ Asistió</button>
-            <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')">📅 Faltó — avisó con tiempo</button>
-            <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')">⏰ Faltó — avisó sobre la hora</button>
-            <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')">❌ Faltó — no avisó</button>
-            <button class="asist-btn feriado" id="ab-feriado" onclick="registrarAsistencia('feriado')">🗓️ Feriado / No hubo sesión</button>
+            <button class="asist-btn asistio" id="ab-asistio" onclick="registrarAsistencia('asistio')" style="padding:10px 14px;border-radius:8px;border:1.5px solid #4caf50;background:#fff;color:#1a5a3a;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;width:100%">✅ Asistió</button>
+            <button class="asist-btn aviso-tiempo" id="ab-aviso-tiempo" onclick="registrarAsistencia('aviso-tiempo')" style="padding:10px 14px;border-radius:8px;border:1.5px solid #ff9800;background:#fff;color:#7a4010;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;width:100%">📅 Faltó — avisó con tiempo</button>
+            <button class="asist-btn aviso-hora" id="ab-aviso-hora" onclick="registrarAsistencia('aviso-hora')" style="padding:10px 14px;border-radius:8px;border:1.5px solid #e65100;background:#fff;color:#a05010;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;width:100%">⏰ Faltó — avisó sobre la hora</button>
+            <button class="asist-btn no-aviso" id="ab-no-aviso" onclick="registrarAsistencia('no-aviso')" style="padding:10px 14px;border-radius:8px;border:1.5px solid #e94560;background:#fff;color:#9a2a2a;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;width:100%">❌ Faltó — no avisó</button>
+            <button class="asist-btn feriado" id="ab-feriado" onclick="registrarAsistencia('feriado')" style="padding:10px 14px;border-radius:8px;border:1.5px solid #3949ab;background:#fff;color:#3949ab;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;width:100%">🗓️ Feriado / No hubo sesión</button>
           </div>
         </div>
       </div>
@@ -587,8 +614,8 @@ function abrirDetalle(id) {
   // Cerrar acordeón al abrir detalle
   const body = document.getElementById('asist-body');
   const chev = document.getElementById('asist-chevron');
-  if(body) body.classList.remove('open');
-  if(chev) chev.classList.remove('open');
+  if(body) body.style.display = 'none';
+  if(chev) chev.style.transform = '';
   const p = pacientes[t.paciente_id] || {};
   document.getElementById('det-pac-nombre').textContent = t.paciente_nombre || '—';
   const tipLabel = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
@@ -615,8 +642,9 @@ function cerrarDetalle() { document.getElementById('panel-detalle').classList.re
 function toggleAsist() {
   const body = document.getElementById('asist-body');
   const chev = document.getElementById('asist-chevron');
-  body.classList.toggle('open');
-  chev.classList.toggle('open');
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.style.transform = isOpen ? '' : 'rotate(90deg)';
 }
 
 function actualizarBadgeAsist(tipo) {
@@ -648,8 +676,8 @@ async function registrarAsistencia(tipo) {
   
   // Actualizar badge del header y cerrar
   actualizarBadgeAsist(tipo);
-  document.getElementById('asist-body').classList.remove('open');
-  document.getElementById('asist-chevron').classList.remove('open');
+  document.getElementById('asist-body').style.display = 'none';
+  document.getElementById('asist-chevron').style.transform = '';
   
   toast(tipo === 'asistio' ? '✓ Asistencia registrada' : tipo === 'feriado' ? '🗓️ Feriado registrado' : '✓ Falta registrada');
   renderVista();
