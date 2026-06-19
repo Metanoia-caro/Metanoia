@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#56112B">
-<title>Metanoia</title>
+<title>Metanoia — Escritorio</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Metanoia">
@@ -50,6 +50,86 @@ body { font-family: 'Inter', sans-serif; }
   overflow: hidden;
   position: relative;
 }
+
+/* ===== ESCRITORIO ===== */
+.desktop-layout {
+  display: flex;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+}
+.desktop-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+.sidebar-logo {
+  background: linear-gradient(160deg, var(--hogar), #1a0010);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 4px;
+}
+.sidebar-logo-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: #fff; }
+.sidebar-logo-sub { font-size: 10px; color: rgba(255,255,255,0.5); font-style: italic; font-family: 'Playfair Display', serif; margin-top: 3px; }
+.sidebar-logo-date { font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 10px; padding-top: 10px; border-top: 0.5px solid rgba(255,255,255,0.1); }
+.sidebar-nav-btn {
+  background: rgba(255,255,255,0.06);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  transition: all .15s;
+  text-decoration: none;
+  width: 100%;
+  text-align: left;
+}
+.sidebar-nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.sidebar-nav-btn.active { background: var(--hogar); color: #fff; border-color: var(--hogar); }
+.sidebar-nav-btn .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+.sidebar-nav-label { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.25); letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 14px 3px; }
+.sidebar-lock-btn {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  width: 100%;
+  margin-top: 4px;
+}
+.sidebar-lock-btn:hover { color: rgba(255,255,255,0.6); }
+/* App en escritorio */
+.desktop-layout .app {
+  flex: 1;
+  max-width: 100%;
+  height: auto;
+  min-height: calc(100vh - 40px);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+.desktop-layout .bottom-bar { display: none !important; }
+.desktop-layout .section-content { padding-bottom: 30px; }
+html, body { background: #1a0010; overflow: auto; }
 
 
 
@@ -256,6 +336,29 @@ body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 <body>
+<div class="desktop-layout">
+  <div class="desktop-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">🌸 Metanoia</div>
+      <div class="sidebar-logo-sub">Tu espacio completo, Caro</div>
+      <div class="sidebar-logo-date" id="sidebar-date"></div>
+    </div>
+    <div class="sidebar-nav-label">Principal</div>
+    <button class="sidebar-nav-btn active" id="snav-trabajo" onclick="setSection('trabajo');setSidebarActive('trabajo')"><span class="nav-icon">💼</span> Trabajo</button>
+    <button class="sidebar-nav-btn" id="snav-hogar" onclick="setSection('hogar');setSidebarActive('hogar')"><span class="nav-icon">🏡</span> Hogar</button>
+    <button class="sidebar-nav-btn" id="snav-yo" onclick="setSection('yo');setSidebarActive('yo')"><span class="nav-icon">🌸</span> Yo</button>
+    <div class="sidebar-nav-label">Módulos</div>
+    <a class="sidebar-nav-btn" href="agenda.html"><span class="nav-icon">📅</span> Agenda</a>
+    <a class="sidebar-nav-btn" href="pacientes.html"><span class="nav-icon">👤</span> Pacientes</a>
+    <a class="sidebar-nav-btn" href="cobros.html"><span class="nav-icon">💰</span> Cobros</a>
+    <a class="sidebar-nav-btn" href="finanzas.html"><span class="nav-icon">📊</span> Finanzas</a>
+    <a class="sidebar-nav-btn" href="obras.html"><span class="nav-icon">🏥</span> Obras sociales</a>
+    <a class="sidebar-nav-btn" href="fadycc.html"><span class="nav-icon">🎓</span> FADYCC</a>
+    <a class="sidebar-nav-btn" href="hogar.html"><span class="nav-icon">🛒</span> Lista compras</a>
+    <a class="sidebar-nav-btn" href="yo.html"><span class="nav-icon">✨</span> Hábitos y yo</a>
+    <a class="sidebar-nav-btn" href="biblioteca.html"><span class="nav-icon">📚</span> Biblioteca</a>
+    <button class="sidebar-lock-btn" onclick="bloquear()">🔒 Bloquear</button>
+  </div>
 <div class="app" id="app-main" style="display:none">
 
   <!-- LOADING -->
@@ -1031,6 +1134,20 @@ window.cambiarPin = () => abrirVista('vista-config');
 calcularAgua();
 setFecha();
 
+// ===== SIDEBAR ESCRITORIO =====
+function setSidebarActive(seccion) {
+  document.querySelectorAll('.sidebar-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('snav-'+seccion);
+  if(btn) btn.classList.add('active');
+}
+// Fecha en sidebar
+const _sd = new Date();
+const _dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const _meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const sdEl = document.getElementById('sidebar-date');
+if(sdEl) sdEl.textContent = `${_dias[_sd.getDay()]} ${_sd.getDate()} de ${_meses[_sd.getMonth()]}`;
+
 </script>
+</div><!-- fin desktop-layout -->
 </body>
 </html>
