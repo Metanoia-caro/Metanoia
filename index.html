@@ -256,9 +256,12 @@ body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 <body>
-<div class="app" id="app-main" style="display:none">
+
+  <!-- APP -->
+  <div id="app-main" style="display:flex;flex-direction:column;height:100%">
 
   <!-- LOADING -->
+  <!-- overlay sobre todo -->
   <div id="loading-screen">
     <div class="loading-logo">Metanoia</div>
     <div class="loading-sub">Cargando tu espacio...</div>
@@ -298,8 +301,6 @@ body { font-family: 'Inter', sans-serif; }
     <div class="pin-error" id="pin-error"></div>
   </div>
 
-  <!-- APP -->
-  <div id="app-main" style="display:none;flex-direction:column;height:100%">
 
     <!-- PORTADA -->
     <div class="cover">
@@ -577,7 +578,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
   </div>
 
-</div>
+
 
 <!-- FIREBASE -->
 <script type="module">

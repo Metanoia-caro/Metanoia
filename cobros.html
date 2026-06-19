@@ -336,14 +336,35 @@ function renderMes() {
   const lista = document.getElementById('lista-mes');
   if (!Object.keys(pacientes).length) { lista.innerHTML = '<div class="empty">Sin pacientes cargados</div>'; return; }
 
-  const items = Object.entries(pacientes).map(([id, p], i) => {
+  // Separar pacientes por grupo
+  const todasEntradas = Object.entries(pacientes);
+  const g1 = todasEntradas.filter(([id,p]) => p.grupo_cobro === 1);
+  const g2 = todasEntradas.filter(([id,p]) => p.grupo_cobro === 2);
+  const sinGrupo = todasEntradas.filter(([id,p]) => !p.grupo_cobro);
+  const ordenados = [...g1, ...g2, ...sinGrupo];
+
+  const items = ordenados.map(([id, p], i) => {
     const cobro = cobros[mesKey]?.[id] || {};
-    const valor = parseFloat(p.valor_sesion || 0);
-    const hs = parseFloat(p.hs_mes || 0);
-    const monto = cobro.monto_custom || (valor * hs);
-    const colect = Math.round(monto * 0.4);
+    const grupo = p.grupo_cobro || 0;
+    
+    let monto = 0;
+    if(grupo === 1) {
+      // Grupo 1: buscar mes en meses_g1
+      const mesData = p.meses_g1?.[mesKey];
+      monto = mesData ? parseFloat(mesData.valor || 0) : 0;
+    } else if(grupo === 2) {
+      // Grupo 2: suma de atenciones activas
+      const atenciones = p.atenciones || {};
+      monto = Object.values(atenciones).filter(a => !a.finalizada).reduce((s,a) => s + parseFloat(a.valor||0), 0);
+    } else {
+      const valor = parseFloat(p.valor_sesion || 0);
+      const hs = parseFloat(p.hs_mes || 0);
+      monto = cobro.monto_custom || (valor * hs);
+    }
+    
+    const colect = p.colectivando ? Math.round(monto * 0.4) : 0;
     const paraMi = monto - colect;
-    const pagado = cobro.pagado || false;
+    const pagado = grupo === 1 ? (p.meses_g1?.[mesKey]?.cobrado || false) : (cobro.pagado || false);
     const transferido = cobro.transferido || false;
 
     if (pagado) { totalCobrado += monto; totalColect += colect; }
@@ -357,8 +378,8 @@ function renderMes() {
       <div class="pc-header" onclick="toggleDet('det-${id}','arr-${id}')">
         <div class="pc-av" style="background:${color}">${ini}</div>
         <div class="pc-info">
-          <div class="pc-nombre">${p.nombre || '—'}${p.colectivando ? ' 🤝' : ''}</div>
-          <div class="pc-hs">${hs} hs · $${valor.toLocaleString('es-AR')}/sesión</div>
+          <div class="pc-nombre">${p.nombre || '—'}${p.colectivando ? ' 🤝' : ''} ${grupo===1?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#e3f2fd;color:#1565c0">G1</span>':grupo===2?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#f3e5f5;color:#6a1b9a">G2</span>':''}</div>
+          <div class="pc-hs">${grupo===1?'Discapacidad · autorización':grupo===2?'Particular/OS':'Sin grupo configurado'}</div>
         </div>
         <div class="pc-monto" style="color:${pagado ? 'var(--trabajo-dark)' : 'var(--texto2)'}">$${monto.toLocaleString('es-AR')}</div>
         <div class="pc-estado ${estCls}" onclick="event.stopPropagation();togglePago('${mesKey}','${id}',${pagado})">${estTxt}</div>
@@ -399,6 +420,14 @@ function toggleDet(detId, arrId) {
 }
 
 async function togglePago(mesKey, pacId, actual) {
+  const p = pacientes[pacId] || {};
+  // Grupo 1: marcar en meses_g1
+  if(p.grupo_cobro === 1) {
+    await db.ref(`pacientes/${pacId}/meses_g1/${mesKey}/cobrado`).set(!actual);
+    if(!actual) await db.ref(`pacientes/${pacId}/meses_g1/${mesKey}/fecha_cobro`).set(new Date().toLocaleDateString('en-CA'));
+    renderMes();
+    return;
+  }
   await db.ref(`cobros/${mesKey}/${pacId}/pagado`).set(!actual);
   if (!actual) await db.ref(`cobros/${mesKey}/${pacId}/fecha_cobro`).set(new Date().toLocaleDateString('en-CA'));
   toast(!actual ? '✓ Marcado como pagado' : 'Marcado como pendiente');

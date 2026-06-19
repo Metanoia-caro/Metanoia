@@ -178,6 +178,15 @@ input:checked+.sl2:before{transform:translateX(20px)}
 
       <div class="tpanel active" id="tab-datos">
         <div class="sh"><div class="stag tag-vd">Datos básicos</div><div class="sl"></div></div>
+        <!-- GRUPO DE COBRO -->
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button id="gbtn-1" onclick="setGrupoCobro(1)" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid #1565c0;background:#e3f2fd;color:#1565c0;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;cursor:pointer">
+            🏥 Grupo 1 — Discapacidad
+          </button>
+          <button id="gbtn-2" onclick="setGrupoCobro(2)" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--borde);background:#fff;color:var(--texto2);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;cursor:pointer">
+            👤 Grupo 2 — Particular/OS
+          </button>
+        </div>
         <div class="crow">
           <div class="campo cfull"><label>Apellido y nombre</label><input id="d-nombre" placeholder="García, Valentina"></div>
           <div class="campo"><label>Fecha nacimiento</label><input type="date" id="d-fnac"></div>
@@ -293,14 +302,41 @@ input:checked+.sl2:before{transform:translateX(20px)}
       </div>
 
       <div class="tpanel" id="tab-cobros">
-        <div class="sh"><div class="stag tag-vd">Control de cobros</div><div class="sl"></div></div>
-        <div class="crow" style="margin-bottom:12px">
-          <div class="campo"><label>Valor por sesión ($ARS)</label><input type="number" id="c-val" placeholder="0" oninput="renderCobros()"></div>
-          <div class="campo"><label>Horas al mes</label><input type="number" id="c-hs" placeholder="4" oninput="renderCobros()"></div>
+        <!-- COBROS GRUPO 1: DISCAPACIDAD -->
+        <div id="cobros-g1" style="display:none">
+          <div class="sh"><div class="stag tag-vd" style="background:#e3f2fd;color:#1565c0">🏥 Discapacidad — Autorización</div><div class="sl"></div></div>
+          <div class="crow">
+            <div class="campo"><label>Mes inicio autorización</label><input type="month" id="g1-mes-inicio"></div>
+            <div class="campo"><label>Mes fin autorización</label><input type="month" id="g1-mes-fin"></div>
+            <div class="campo"><label>Frecuencia semanal</label>
+              <select id="g1-frecuencia">
+                <option value="1">1 vez por semana</option>
+                <option value="2">2 veces por semana</option>
+                <option value="3">3 veces por semana</option>
+                <option value="4">4 veces por semana</option>
+                <option value="5">5 veces por semana</option>
+              </select>
+            </div>
+            <div class="campo"><label>Valor nomenclador ($ARS)</label><input type="number" id="g1-valor" placeholder="0"></div>
+            <div class="campo cfull"><label>Obra social / Prestadora</label><input id="g1-os" placeholder="IOMA, OSDE, UPCN..."></div>
+            <div class="campo cfull"><label>Notas de autorización</label><input id="g1-notas" placeholder="Nro. expediente, observaciones..."></div>
+          </div>
+          <button class="btn" onclick="guardarConfigG1()"><i class="ti ti-check"></i> Guardar configuración</button>
+          <div class="sh" style="margin-top:14px"><div class="stag tag-vd">Meses autorizados</div><div class="sl"></div></div>
+          <div id="g1-meses-lista"></div>
+          ${p && p.colectivando ? '<div style="background:var(--yo-soft);border-radius:9px;padding:10px 12px;margin-top:8px;display:flex;align-items:center;gap:8px"><span>🤝</span><div style="font-size:10px;color:var(--yo-dark);font-weight:600">Colectivando (40%) calculado automáticamente</div></div>' : ''}
         </div>
-        <div id="ctabla"></div>
-        <div style="background:var(--yo-soft);border-radius:9px;padding:10px 12px;margin-top:8px;display:flex;align-items:center;gap:8px">
-          <span>🤝</span><div style="font-size:10px;color:var(--yo-dark);font-weight:600">Colectivando (40%) calculado automáticamente</div>
+
+        <!-- COBROS GRUPO 2: PARTICULAR/OS -->
+        <div id="cobros-g2" style="display:none">
+          <div class="sh"><div class="stag tag-vd" style="background:#f3e5f5;color:#6a1b9a">👤 Atenciones registradas</div><div class="sl"></div></div>
+          <div id="g2-atenciones-lista"></div>
+          <button class="add-btn" onclick="abrirNuevaAtencion()"><i class="ti ti-plus"></i> Agregar tipo de atención</button>
+        </div>
+
+        <!-- SIN GRUPO SELECCIONADO -->
+        <div id="cobros-sin-grupo" style="text-align:center;padding:30px;color:var(--texto2);font-size:12px">
+          Seleccioná el grupo de cobro en la pestaña <strong>Datos</strong> para ver las opciones correspondientes.
         </div>
         <button class="btn" onclick="guardarCobros()"><i class="ti ti-check"></i> Guardar</button>
       </div>
@@ -337,6 +373,36 @@ input:checked+.sl2:before{transform:translateX(20px)}
       </div>
       <button class="btn" onclick="crear()"><i class="ti ti-user-plus"></i> Crear ficha</button>
       <button class="btn-out" onclick="closeVista('vnuevo')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PANEL NUEVA ATENCIÓN G2 -->
+  <div class="panel" id="panel-nueva-atencion">
+    <div class="panel-cover">
+      <button class="panel-back" onclick="cerrarPanel('panel-nueva-atencion')"><i class="ti ti-arrow-left"></i> Cancelar</button>
+      <div class="panel-titulo">Nueva atención</div>
+    </div>
+    <div class="panel-body">
+      <div class="campo"><label>Tipo de atención *</label>
+        <select id="at-tipo">
+          <option value="Evaluación">📋 Evaluación</option>
+          <option value="Tratamiento">🧠 Tratamiento</option>
+          <option value="Reunión">🤝 Reunión</option>
+          <option value="Informe">📄 Informe</option>
+          <option value="Otro">📎 Otro</option>
+        </select>
+      </div>
+      <div class="campo"><label>Valor por sesión ($ARS)</label>
+        <input type="number" id="at-valor" placeholder="0">
+      </div>
+      <div class="campo"><label>Fecha de inicio</label>
+        <input type="date" id="at-fecha">
+      </div>
+      <div class="campo"><label>Notas</label>
+        <input id="at-notas-at" placeholder="Observaciones, instrumentos a usar...">
+      </div>
+      <button class="btn" onclick="guardarNuevaAtencion()"><i class="ti ti-check"></i> Guardar atención</button>
+      <button class="btn-out" onclick="cerrarPanel('panel-nueva-atencion')">Cancelar</button>
     </div>
   </div>
 
@@ -513,6 +579,10 @@ function openPac(id) {
   renderCobros();
   // Sesiones
   cargarSesiones(id);
+  // Cargar grupo de cobro
+  grupoCobro = p.grupo_cobro || 0;
+  setGrupoCobro(grupoCobro);
+
   // Mostrar familia según franja
   const franja = p.franja || 'nino';
   const famNinos = document.getElementById('familia-ninos');
@@ -575,6 +645,222 @@ function agregarHijo() {
     <div class="campo" style="margin:0"><label>Edad</label><input id="hijo-e-${idx}" placeholder="Edad" type="number"></div>
     <div class="campo cfull" style="margin:0;grid-column:1/-1"><label>Escolaridad / Situación</label><input id="hijo-esc-${idx}" placeholder="Grado, nivel, trabaja..."></div>`;
   lista.appendChild(div);
+}
+
+// ===== GRUPO DE COBRO =====
+let grupoCobro = 0;
+
+function setGrupoCobro(g) {
+  grupoCobro = g;
+  const btn1 = document.getElementById('gbtn-1');
+  const btn2 = document.getElementById('gbtn-2');
+  if(btn1) {
+    btn1.style.background = g===1 ? '#e3f2fd' : '#fff';
+    btn1.style.borderColor = g===1 ? '#1565c0' : 'var(--borde)';
+    btn1.style.color = g===1 ? '#1565c0' : 'var(--texto2)';
+  }
+  if(btn2) {
+    btn2.style.background = g===2 ? '#f3e5f5' : '#fff';
+    btn2.style.borderColor = g===2 ? '#6a1b9a' : 'var(--borde)';
+    btn2.style.color = g===2 ? '#6a1b9a' : 'var(--texto2)';
+  }
+  renderCobrosTab();
+}
+
+function renderCobrosTab() {
+  const p = pacs[pidActual] || {};
+  const g = grupoCobro || p.grupo_cobro || 0;
+  document.getElementById('cobros-g1').style.display = g===1 ? 'block' : 'none';
+  document.getElementById('cobros-g2').style.display = g===2 ? 'block' : 'none';
+  document.getElementById('cobros-sin-grupo').style.display = g===0 ? 'block' : 'none';
+  if(g===1) renderG1Meses();
+  if(g===2) renderG2Atenciones();
+}
+
+// ===== GRUPO 1: DISCAPACIDAD =====
+async function guardarConfigG1() {
+  if(!pidActual) return;
+  const ini = document.getElementById('g1-mes-inicio').value;
+  const fin = document.getElementById('g1-mes-fin').value;
+  if(!ini || !fin) { toast('⚠ Completá los meses de autorización'); return; }
+  const config = {
+    mes_inicio: ini, mes_fin: fin,
+    frecuencia: parseInt(document.getElementById('g1-frecuencia').value),
+    valor: parseFloat(document.getElementById('g1-valor').value) || 0,
+    os: document.getElementById('g1-os').value,
+    notas: document.getElementById('g1-notas').value,
+  };
+  await db.ref('pacientes/' + pidActual + '/config_g1').set(config);
+  await db.ref('pacientes/' + pidActual + '/grupo_cobro').set(1);
+  // Generar meses automáticamente
+  await generarMesesG1(ini, fin, config.valor);
+  toast('✓ Configuración guardada');
+  renderG1Meses();
+}
+
+async function generarMesesG1(ini, fin, valor) {
+  const [yIni, mIni] = ini.split('-').map(Number);
+  const [yFin, mFin] = fin.split('-').map(Number);
+  const meses = {};
+  let y = yIni, m = mIni;
+  while(y < yFin || (y === yFin && m <= mFin)) {
+    const key = `${y}-${String(m).padStart(2,'0')}`;
+    // Solo agregar si no existe ya (para no sobreescribir cobros ya registrados)
+    const snap = await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).once('value');
+    if(!snap.exists()) {
+      await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).set({
+        valor, cobrado: false, creado: Date.now()
+      });
+    }
+    m++;
+    if(m > 12) { m = 1; y++; }
+  }
+}
+
+function renderG1Meses() {
+  const p = pacs[pidActual] || {};
+  const meses = p.meses_g1 || {};
+  const el = document.getElementById('g1-meses-lista');
+  if(!el) return;
+  const MESES_N = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const items = Object.entries(meses).sort((a,b) => a[0].localeCompare(b[0]));
+  if(!items.length) { el.innerHTML = '<div class="empty">Sin meses generados. Completá la autorización arriba.</div>'; return; }
+  
+  const colect = p.colectivando;
+  let totalCobrado = 0;
+  el.innerHTML = items.map(([key, m]) => {
+    const [y, mon] = key.split('-').map(Number);
+    const label = `${MESES_N[mon]} ${y}`;
+    const val = parseFloat(m.valor || 0);
+    const colectMonto = colect ? Math.round(val * 0.4) : 0;
+    const paraMi = val - colectMonto;
+    if(m.cobrado) totalCobrado += val;
+    return `<div class="mes-cobro-row ${m.cobrado?'cobrado':''}">
+      <input type="checkbox" class="mes-check" ${m.cobrado?'checked':''} onchange="toggleMesG1('${key}',${!m.cobrado})">
+      <div style="flex:1">
+        <div class="mes-cobro-nombre">${label}</div>
+        ${colect ? `<div class="mes-cobro-colect">Para mí: $${paraMi.toLocaleString('es-AR')} · Colect: $${colectMonto.toLocaleString('es-AR')}</div>` : ''}
+      </div>
+      <div class="mes-cobro-monto">$${val.toLocaleString('es-AR')}</div>
+      <button class="mes-del" onclick="editarValorMes('${key}')" title="Editar valor"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+      <button class="mes-del" onclick="eliminarMesG1('${key}')"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+  
+  // Resumen
+  el.innerHTML += `<div style="background:var(--fondo2);border-radius:9px;padding:10px 12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:11px;color:var(--texto2);font-weight:600">Total cobrado</span>
+    <span style="font-size:13px;font-weight:700;color:var(--trabajo-dark)">$${totalCobrado.toLocaleString('es-AR')}</span>
+  </div>`;
+
+  // Cargar config actual
+  const cfg = p.config_g1 || {};
+  if(cfg.mes_inicio) document.getElementById('g1-mes-inicio').value = cfg.mes_inicio;
+  if(cfg.mes_fin) document.getElementById('g1-mes-fin').value = cfg.mes_fin;
+  if(cfg.frecuencia) document.getElementById('g1-frecuencia').value = cfg.frecuencia;
+  if(cfg.valor) document.getElementById('g1-valor').value = cfg.valor;
+  if(cfg.os) document.getElementById('g1-os').value = cfg.os;
+  if(cfg.notas) document.getElementById('g1-notas').value = cfg.notas;
+}
+
+async function toggleMesG1(key, val) {
+  await db.ref(`pacientes/${pidActual}/meses_g1/${key}/cobrado`).set(val);
+  if(val) await db.ref(`pacientes/${pidActual}/meses_g1/${key}/fecha_cobro`).set(fechaHoy());
+  renderG1Meses();
+}
+
+async function eliminarMesG1(key) {
+  if(!confirm('¿Eliminar este mes?')) return;
+  await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).remove();
+  renderG1Meses();
+}
+
+async function editarValorMes(key) {
+  const p = pacs[pidActual] || {};
+  const actual = p.meses_g1?.[key]?.valor || 0;
+  const nuevo = prompt(`Nuevo valor para este mes ($ARS):`, actual);
+  if(nuevo === null) return;
+  await db.ref(`pacientes/${pidActual}/meses_g1/${key}/valor`).set(parseFloat(nuevo) || 0);
+  renderG1Meses();
+  toast('✓ Valor actualizado');
+}
+
+function fechaHoy() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ===== GRUPO 2: ATENCIONES =====
+function renderG2Atenciones() {
+  const p = pacs[pidActual] || {};
+  const atenciones = p.atenciones || {};
+  const el = document.getElementById('g2-atenciones-lista');
+  if(!el) return;
+  const items = Object.entries(atenciones).sort((a,b) => (b[1].creado||0)-(a[1].creado||0));
+  if(!items.length) { el.innerHTML = '<div class="empty">Sin atenciones registradas.<br>Agregá el tipo de atención actual.</div>'; return; }
+  
+  el.innerHTML = items.map(([id, at]) => {
+    const colect = p.colectivando;
+    const val = parseFloat(at.valor || 0);
+    const colectMonto = colect ? Math.round(val * 0.4) : 0;
+    return `<div class="atencion-card ${at.finalizada?'finalizada':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="at-tipo">${at.tipo||'—'}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${!at.finalizada ? `<button onclick="finalizarAtencion('${id}')" style="font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;background:#d6f0e8;color:#1a5a3a;border:none;cursor:pointer">✓ Finalizar</button>` : '<span style="font-size:9px;color:var(--texto2)">Finalizada</span>'}
+          <button onclick="eliminarAtencion('${id}')" style="background:none;border:none;color:#ddd;font-size:14px;cursor:pointer"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="at-det">Inicio: ${at.fecha_inicio||'—'} ${at.notas?'· '+at.notas:''}</div>
+      <div class="at-valor">$${val.toLocaleString('es-AR')} / sesión ${colect ? `<span style="font-size:10px;color:var(--yo-dark)">· Para mí: $${(val-colectMonto).toLocaleString('es-AR')}</span>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+let panelAtAbierto = false;
+function abrirNuevaAtencion() {
+  document.getElementById('panel-nueva-atencion').classList.add('open');
+  // Cargar valores de aranceles
+  db.ref('config/aranceles').once('value').then(s => {
+    const ar = s.val() || {};
+    const sel = document.getElementById('at-tipo');
+    if(sel) {
+      const tipos = ['Evaluación','Tratamiento','Reunión','Informe','Otro'];
+      sel.innerHTML = tipos.map(t => `<option value="${t}" ${ar[t]?'data-valor="'+ar[t]+'"':''}>${t} ${ar[t]?'($'+parseFloat(ar[t]).toLocaleString('es-AR')+')':''}</option>`).join('');
+      sel.onchange = () => {
+        const opt = sel.options[sel.selectedIndex];
+        const v = ar[sel.value] || 0;
+        if(document.getElementById('at-valor')) document.getElementById('at-valor').value = v;
+      };
+      sel.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+async function guardarNuevaAtencion() {
+  if(!pidActual) return;
+  const tipo = document.getElementById('at-tipo').value;
+  const valor = parseFloat(document.getElementById('at-valor').value) || 0;
+  const fecha = document.getElementById('at-fecha').value;
+  const notas = document.getElementById('at-notas-at').value;
+  if(!tipo) { toast('⚠ Seleccioná el tipo'); return; }
+  await db.ref(`pacientes/${pidActual}/atenciones`).push({ tipo, valor, fecha_inicio: fecha, notas, finalizada: false, creado: Date.now() });
+  await db.ref(`pacientes/${pidActual}/grupo_cobro`).set(2);
+  cerrarPanel('panel-nueva-atencion');
+  toast('✓ Atención registrada');
+  renderG2Atenciones();
+}
+
+async function finalizarAtencion(id) {
+  await db.ref(`pacientes/${pidActual}/atenciones/${id}`).update({ finalizada: true, fecha_fin: fechaHoy() });
+  renderG2Atenciones();
+  toast('✓ Atención finalizada');
+}
+
+async function eliminarAtencion(id) {
+  if(!confirm('¿Eliminar esta atención?')) return;
+  await db.ref(`pacientes/${pidActual}/atenciones/${id}`).remove();
+  renderG2Atenciones();
 }
 
 async function guardarFamilia() {
