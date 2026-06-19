@@ -605,9 +605,6 @@ body { font-family: 'Inter', sans-serif; }
   window.dbUpdate = update;
   window.dbRemove = remove;
 
-  window.addEventListener('load', () => {
-    iniciarApp();
-  });
 </script>
 
 <script>
@@ -1030,6 +1027,17 @@ window.cambiarPin = () => abrirVista('vista-config');
 // ===== HABITOS CARGA INICIAL =====
 calcularAgua();
 setFecha();
+
+// Iniciar app cuando todo esté listo
+window.addEventListener('DOMContentLoaded', function() {
+  if(typeof iniciarApp === 'function') iniciarApp();
+});
+// Fallback por si DOMContentLoaded ya pasó
+if(document.readyState !== 'loading') {
+  setTimeout(function() {
+    if(typeof iniciarApp === 'function') iniciarApp();
+  }, 100);
+}
 
 </script>
 </body>
