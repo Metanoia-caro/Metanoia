@@ -579,9 +579,11 @@ function openPac(id) {
     if (el) el.value = pf[k] || '';
   });
   // Cobros
-  document.getElementById('c-val').value = p.valor_sesion || '';
-  document.getElementById('c-hs').value = p.hs_mes || '';
-  renderCobros();
+  // Campos legacy (pueden no existir)
+  const cVal = document.getElementById('c-val');
+  const cHs = document.getElementById('c-hs');
+  if(cVal) cVal.value = p.valor_sesion || '';
+  if(cHs) cHs.value = p.hs_mes || '';
   // Sesiones
   cargarSesiones(id);
   // Cargar grupo de cobro
@@ -625,11 +627,16 @@ function openPac(id) {
 
 function closeVista(id) { document.getElementById(id).classList.remove('open'); if (id === 'vdet') pidActual = null; }
 function setTab(t) {
+  tabActual = t;
   document.querySelectorAll('.tpanel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.itab').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + t).classList.add('active');
+  const tabEl = document.getElementById('tab-' + t);
+  if(tabEl) tabEl.classList.add('active');
   const tabs = ['datos','familia','admision','sesiones','cobros'];
-  document.querySelectorAll('.itab')[tabs.indexOf(t)].classList.add('active');
+  const tabIdx = tabs.indexOf(t);
+  const allItabs = document.querySelectorAll('.itab');
+  if(tabIdx !== -1 && allItabs[tabIdx]) allItabs[tabIdx].classList.add('active');
+  if(t === 'cobros') renderCobrosTab();
 }
 
 async function guardarDatos() {
@@ -653,6 +660,7 @@ function agregarHijo() {
 }
 
 // ===== GRUPO DE COBRO =====
+let tabActual = "datos";
 let grupoCobro = 0;
 
 function setGrupoCobro(g) {
@@ -926,8 +934,8 @@ async function guardarSesion() {
 }
 
 function renderCobros() {
-  const val = parseFloat(document.getElementById('c-val').value) || 0;
-  const hs = parseFloat(document.getElementById('c-hs').value) || 0;
+  const val = parseFloat(document.getElementById('c-val')?.value) || 0;
+  const hs = parseFloat(document.getElementById('c-hs')?.value) || 0;
   const monto = val * hs;
   const col = Math.round(monto * 0.4);
   const mi = monto - col;
@@ -948,7 +956,7 @@ async function togglePago(mes) {
 
 async function guardarCobros() {
   if (!pidActual) return;
-  await db.ref('pacientes/' + pidActual).update({ valor_sesion: parseFloat(document.getElementById('c-val').value)||0, hs_mes: parseFloat(document.getElementById('c-hs').value)||0 });
+  await db.ref('pacientes/' + pidActual).update({ valor_sesion: parseFloat(document.getElementById('c-val')?.value)||0, hs_mes: parseFloat(document.getElementById('c-hs')?.value)||0 });
   toast('✓ Cobros guardados');
 }
 
