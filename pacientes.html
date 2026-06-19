@@ -121,6 +121,7 @@ input:checked+.sl2:before{transform:translateX(20px)}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--trabajo-dark);color:#fff;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;white-space:nowrap}
 .toast.show{opacity:1}
 .loading{text-align:center;padding:40px;color:var(--texto2);font-size:12px}
+.tpanel{display:none}.tpanel.active{display:block}
 </style>
 
 <style>
@@ -677,15 +678,18 @@ function setGrupoCobro(g) {
     btn2.style.borderColor = g===2 ? '#6a1b9a' : 'var(--borde)';
     btn2.style.color = g===2 ? '#6a1b9a' : 'var(--texto2)';
   }
-  renderCobrosTab();
+  if(pidActual) renderCobrosTab();
 }
 
 function renderCobrosTab() {
   const p = pacs[pidActual] || {};
   const g = grupoCobro || p.grupo_cobro || 0;
-  document.getElementById('cobros-g1').style.display = g===1 ? 'block' : 'none';
-  document.getElementById('cobros-g2').style.display = g===2 ? 'block' : 'none';
-  document.getElementById('cobros-sin-grupo').style.display = g===0 ? 'block' : 'none';
+  const el1 = document.getElementById('cobros-g1');
+  const el2 = document.getElementById('cobros-g2');
+  const el0 = document.getElementById('cobros-sin-grupo');
+  if(el1) el1.style.display = g===1 ? 'block' : 'none';
+  if(el2) el2.style.display = g===2 ? 'block' : 'none';
+  if(el0) el0.style.display = g===0 ? 'block' : 'none';
   if(g===1) renderG1Meses();
   if(g===2) renderG2Atenciones();
 }
