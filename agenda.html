@@ -507,12 +507,14 @@ function renderDia() {
       let dot = colect ? 'var(--hogar)' : t.tipo === 'fijo' ? 'var(--trabajo)' : t.tipo === 'quinc' ? 'var(--yo)' : '#c8860b';
       let badge = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
       const horaFin = calcHoraFin(t.hora, t.duracion);
-      const asistBadge = t.asistencia ? 
-      `<span class="asist-badge ab-${t.asistencia}">${
-        t.asistencia==='asistio'?'✓ Asistió':
-        t.asistencia==='no-aviso'?'✗ No avisó':
-        t.asistencia==='aviso-tiempo'?'📅 Avisó':
-        t.asistencia==='aviso-hora'?'⏰ Sobre la hora':t.asistencia==='feriado'?'🗓️ Feriado':'?'
+      // Asistencia se lee de 'asistencias' separado, usar placeholder por ahora
+      const asistHoyVal = window._asistencias?.[id]?.[fechaLocal()] || null;
+      const asistBadge = asistHoyVal ? 
+      `<span class="asist-badge ab-${asistHoyVal}">${
+        asistHoyVal==='asistio'?'✓ Asistió':
+        asistHoyVal==='no-aviso'?'✗ No avisó':
+        asistHoyVal==='aviso-tiempo'?'📅 Avisó':
+        asistHoyVal==='aviso-hora'?'⏰ Sobre la hora':asistHoyVal==='feriado'?'🗓️ Feriado':'?'
       }</span>` : 
       `<span class="asist-badge ab-pendiente">Sin registrar</span>`;
       
@@ -600,17 +602,28 @@ function abrirDetalle(id) {
   if (!t) return;
   turnoActualId = id;
   
-  // Actualizar badge de asistencia
-  actualizarBadgeAsist(t.asistencia || null);
-  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
-  opts.forEach(o => {
-    const btn = document.getElementById('ab-'+o);
-    if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); }
+  // Leer asistencia de HOY para este turno (por fecha)
+  const fechaHoy = fechaLocal();
+  db.ref('asistencias/' + id + '/' + fechaHoy).once('value').then(snap => {
+    const asistHoy = snap.val();
+    actualizarBadgeAsist(asistHoy || null);
+    const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
+    opts.forEach(o => {
+      const btn = document.getElementById('ab-'+o);
+      if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); }
+    });
+    if(asistHoy) {
+      const btn = document.getElementById('ab-'+asistHoy);
+      if(btn) { btn.classList.add('sel', asistHoy); }
+    }
+    // Cerrar acordeón si ya está registrado
+    if(asistHoy) {
+      const body = document.getElementById('asist-body');
+      const chev = document.getElementById('asist-chevron');
+      if(body) body.style.display = 'none';
+      if(chev) chev.style.transform = '';
+    }
   });
-  if(t.asistencia) {
-    const btn = document.getElementById('ab-'+t.asistencia);
-    if(btn) { btn.classList.add('sel', t.asistencia); }
-  }
   // Cerrar acordeón al abrir detalle
   const body = document.getElementById('asist-body');
   const chev = document.getElementById('asist-chevron');
@@ -664,8 +677,9 @@ function actualizarBadgeAsist(tipo) {
 
 async function registrarAsistencia(tipo) {
   if(!turnoActualId) return;
-  await db.ref('turnos/' + turnoActualId + '/asistencia').set(tipo);
-  await db.ref('turnos/' + turnoActualId + '/asistencia_fecha').set(fechaLocal());
+  const fechaHoy = fechaLocal();
+  // Guardar por fecha para que cada semana sea independiente
+  await db.ref('asistencias/' + turnoActualId + '/' + fechaHoy).set(tipo);
   
   // Actualizar botones
   const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
