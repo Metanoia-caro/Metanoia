@@ -328,6 +328,13 @@ input:checked+.sl2:before{transform:translateX(20px)}
             <div class="campo cfull"><label>Notas de autorización</label><input id="g1-notas" placeholder="Nro. expediente, observaciones..."></div>
           </div>
           <button class="btn" onclick="guardarConfigG1()"><i class="ti ti-check"></i> Guardar configuración</button>
+      <div style="background:var(--fondo2);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--texto2);line-height:1.6">
+        💡 <strong>Para actualizar el valor desde un mes específico</strong> (ej: cuando hay aumento), cambiá el "Valor nomenclador" arriba y usá el lápiz ✏️ en cada mes para editar individualmente. O podés usar el botón de abajo para actualizar todos los meses no cobrados desde un mes en adelante.
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="month" id="g1-desde-mes" style="flex:1;background:var(--fondo2);border:0.5px solid var(--borde);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Inter',sans-serif;outline:none">
+        <button onclick="actualizarValorDesde()" style="background:var(--trabajo-soft);border:0.5px solid var(--trabajo);border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;color:var(--trabajo-dark);cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Actualizar desde este mes →</button>
+      </div>
           <div class="sh" style="margin-top:14px"><div class="stag tag-vd">Meses autorizados</div><div class="sl"></div></div>
           <div id="g1-meses-lista"></div>
           ${p && p.colectivando ? '<div style="background:var(--yo-soft);border-radius:9px;padding:10px 12px;margin-top:8px;display:flex;align-items:center;gap:8px"><span>🤝</span><div style="font-size:10px;color:var(--yo-dark);font-weight:600">Colectivando (40%) calculado automáticamente</div></div>' : ''}
@@ -735,10 +742,17 @@ async function generarMesesG1(ini, fin, valor) {
 }
 
 function renderG1Meses() {
-  const p = pacs[pidActual] || {};
-  const meses = p.meses_g1 || {};
   const el = document.getElementById('g1-meses-lista');
   if(!el) return;
+  // Leer directo de Firebase para tener datos actualizados
+  db.ref(`pacientes/${pidActual}/meses_g1`).once('value').then(snap => {
+    const meses = snap.val() || {};
+    const p = pacs[pidActual] || {};
+    _renderG1MesesData(meses, p, el);
+  });
+}
+
+function _renderG1MesesData(meses, p, el) {
   const MESES_N = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const items = Object.entries(meses).sort((a,b) => a[0].localeCompare(b[0]));
   if(!items.length) { el.innerHTML = '<div class="empty">Sin meses generados. Completá la autorización arriba.</div>'; return; }
@@ -772,12 +786,41 @@ function renderG1Meses() {
 
   // Cargar config actual
   const cfg = p.config_g1 || {};
-  if(cfg.mes_inicio) document.getElementById('g1-mes-inicio').value = cfg.mes_inicio;
-  if(cfg.mes_fin) document.getElementById('g1-mes-fin').value = cfg.mes_fin;
-  if(cfg.frecuencia) document.getElementById('g1-frecuencia').value = cfg.frecuencia;
-  if(cfg.valor) document.getElementById('g1-valor').value = cfg.valor;
-  if(cfg.os) document.getElementById('g1-os').value = cfg.os;
-  if(cfg.notas) document.getElementById('g1-notas').value = cfg.notas;
+  if(cfg.mes_inicio) { const el2 = document.getElementById('g1-mes-inicio'); if(el2) el2.value = cfg.mes_inicio; }
+  if(cfg.mes_fin) { const el2 = document.getElementById('g1-mes-fin'); if(el2) el2.value = cfg.mes_fin; }
+  if(cfg.frecuencia) { const el2 = document.getElementById('g1-frecuencia'); if(el2) el2.value = cfg.frecuencia; }
+  if(cfg.valor) { const el2 = document.getElementById('g1-valor'); if(el2) el2.value = cfg.valor; }
+  if(cfg.os) { const el2 = document.getElementById('g1-os'); if(el2) el2.value = cfg.os; }
+  if(cfg.notas) { const el2 = document.getElementById('g1-notas'); if(el2) el2.value = cfg.notas; }
+}
+
+async function actualizarValorDesde() {
+  if(!pidActual) return;
+  const desde = document.getElementById('g1-desde-mes').value;
+  const nuevoValor = parseFloat(document.getElementById('g1-valor').value) || 0;
+  if(!desde) { toast('⚠ Seleccioná el mes desde el que aplicar el nuevo valor'); return; }
+  if(!nuevoValor) { toast('⚠ Ingresá el nuevo valor del nomenclador'); return; }
+  
+  // Leer todos los meses
+  const snap = await db.ref(`pacientes/${pidActual}/meses_g1`).once('value');
+  const meses = snap.val() || {};
+  
+  // Actualizar solo los meses >= desde que no estén cobrados
+  const updates = {};
+  Object.entries(meses).forEach(([key, m]) => {
+    if(key >= desde && !m.cobrado) {
+      updates[`pacientes/${pidActual}/meses_g1/${key}/valor`] = nuevoValor;
+    }
+  });
+  
+  if(Object.keys(updates).length === 0) {
+    toast('No hay meses sin cobrar desde ese mes');
+    return;
+  }
+  
+  await db.ref().update(updates);
+  toast(`✓ Valor actualizado en ${Object.keys(updates).length} mes/es`);
+  renderG1Meses();
 }
 
 async function toggleMesG1(key, val) {

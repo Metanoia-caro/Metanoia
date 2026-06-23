@@ -805,11 +805,14 @@ function actualizarPeso(val) {
 window.actualizarPeso = actualizarPeso;
 
 // ===== VERIFICAR ASISTENCIAS PENDIENTES =====
-function verificarAsistenciasPendientes(turnos) {
-  const hoy = new Date();
-  const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+function verificarAsistenciasPendientes(turnos, hoyStr) {
+  if(!hoyStr) {
+    const _h = new Date();
+    hoyStr = `${_h.getFullYear()}-${String(_h.getMonth()+1).padStart(2,'0')}-${String(_h.getDate()).padStart(2,'0')}`;
+  }
+  const _hoyD = new Date();
   const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-  const diaHoy = diasSemana[hoy.getDay()];
+  const diaHoy = diasSemana[_hoyD.getDay()];
 
   const pendientes = Object.entries(turnos).filter(([id, t]) => {
     const esHoy = t.dia === diaHoy || t.fecha === hoyStr;
@@ -821,7 +824,7 @@ function verificarAsistenciasPendientes(turnos) {
       const [h, m] = t.hora.split(':').map(Number);
       const horaT = new Date();
       horaT.setHours(h, m + 30, 0);
-      return hoy > horaT;
+      return _hoyD > horaT;
     }
     return false;
   });
@@ -936,7 +939,7 @@ function cargarDatosHoy() {
     });
     const turnosHoy = [...turnosHoyMap.entries()];
     document.getElementById('res-turnos').querySelector('.res-mini-num').textContent = turnosHoy.length;
-    verificarAsistenciasPendientes(turnos);
+    verificarAsistenciasPendientes(turnos, hoy);
     const subEl = document.getElementById('saludo-sub');
     if(subEl) subEl.textContent = turnosHoy.length > 0 ? `${turnosHoy.length} turno${turnosHoy.length>1?'s':''} hoy` : 'sin turnos hoy';
 
