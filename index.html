@@ -805,28 +805,16 @@ function actualizarPeso(val) {
 window.actualizarPeso = actualizarPeso;
 
 // ===== VERIFICAR ASISTENCIAS PENDIENTES =====
-async function verificarAsistenciasPendientes(turnos) {
+function verificarAsistenciasPendientes(turnos) {
   const hoy = new Date();
   const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
   const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
   const diaHoy = diasSemana[hoy.getDay()];
 
-  // Leer asistencias de hoy directamente de Firebase
-  let asistHoy = {};
-  try {
-    const snap = await window.dbGet(window.dbRef(window.db, 'asistencias'));
-    const todas = snap.val() || {};
-    Object.entries(todas).forEach(([tid, fechas]) => {
-      if(fechas && fechas[hoyStr]) asistHoy[tid] = fechas[hoyStr];
-    });
-  } catch(e) {}
-
   const pendientes = Object.entries(turnos).filter(([id, t]) => {
     const esHoy = t.dia === diaHoy || t.fecha === hoyStr;
     if(!esHoy) return false;
-    // Si ya tiene asistencia registrada hoy, no mostrar
-    if(asistHoy[id]) return false;
-    // Legacy: asistencia guardada directamente en el turno
+    // Verificar si ya tiene asistencia registrada HOY (comparando fecha)
     if(t.asistencia && t.asistencia_fecha === hoyStr) return false;
     // Verificar si ya pasó la hora del turno + 30 min
     if(t.hora) {
@@ -891,21 +879,7 @@ function cargarDatosHoy() {
   if(elSaludo) elSaludo.textContent = saludoTxt;
 
   // Cargar hábitos del día
-  // Escuchar asistencias en tiempo real para actualizar el aviso
-    window.dbOnValue(window.dbRef(window.db, 'asistencias'), snap => {
-      const todas = snap.val() || {};
-      window._asistHoy = {};
-      const _h = new Date();
-      const _hoyLocal = `${_h.getFullYear()}-${String(_h.getMonth()+1).padStart(2,'0')}-${String(_h.getDate()).padStart(2,'0')}`;
-      Object.entries(todas).forEach(([tid, fechas]) => {
-        if(fechas && fechas[_hoyLocal]) window._asistHoy[tid] = fechas[_hoyLocal];
-      });
-      // Recargar turnos para actualizar el aviso naranja
-      window.dbGet(window.dbRef(window.db, 'turnos')).then(tSnap => {
-        if(tSnap.exists()) verificarAsistenciasPendientes(tSnap.val());
-      });
-    });
-
+  
     window.dbGet(window.dbRef(window.db, `habitos/${hoy}`)).then(snap => {
     if (snap.exists()) {
       const data = snap.val();
@@ -943,9 +917,9 @@ function cargarDatosHoy() {
   });
 
   // Turnos de hoy
-  window.dbGet(window.dbRef(window.db, 'turnos')).then(snap => {
+  window.dbOnValue(window.dbRef(window.db, 'turnos'), snap => {
     const lista = document.getElementById('agenda-hoy-list');
-    if (!snap.exists()) {
+    if (!snap || !snap.exists()) {
       lista.innerHTML = '<div class="empty-state"><div class="emoji">📅</div>Sin turnos hoy. ¡Agregá desde la agenda!</div>';
       document.getElementById('res-turnos').querySelector('.res-mini-num').textContent = '0';
       return;

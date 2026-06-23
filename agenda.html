@@ -507,8 +507,9 @@ function renderDia() {
       let dot = colect ? 'var(--hogar)' : t.tipo === 'fijo' ? 'var(--trabajo)' : t.tipo === 'quinc' ? 'var(--yo)' : '#c8860b';
       let badge = t.tipo === 'fijo' ? 'Fijo semanal' : t.tipo === 'quinc' ? 'Quincenal' : 'Evaluación';
       const horaFin = calcHoraFin(t.hora, t.duracion);
-      // Asistencia se lee de 'asistencias' separado, usar placeholder por ahora
-      const asistHoyVal = window._asistencias?.[id]?.[fechaLocal()] || null;
+      // Mostrar asistencia solo si es de hoy
+      const _fechaHoy = fechaLocal(fechaBase);
+      const asistHoyVal = (t.asistencia_fecha === _fechaHoy) ? t.asistencia : null;
       const asistBadge = asistHoyVal ? 
       `<span class="asist-badge ab-${asistHoyVal}">${
         asistHoyVal==='asistio'?'✓ Asistió':
@@ -602,28 +603,19 @@ function abrirDetalle(id) {
   if (!t) return;
   turnoActualId = id;
   
-  // Leer asistencia de HOY para este turno (por fecha)
+  // Leer asistencia del turno - solo válida si es de hoy
   const fechaHoy = fechaLocal();
-  db.ref('asistencias/' + id + '/' + fechaHoy).once('value').then(snap => {
-    const asistHoy = snap.val();
-    actualizarBadgeAsist(asistHoy || null);
-    const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
-    opts.forEach(o => {
-      const btn = document.getElementById('ab-'+o);
-      if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); }
-    });
-    if(asistHoy) {
-      const btn = document.getElementById('ab-'+asistHoy);
-      if(btn) { btn.classList.add('sel', asistHoy); }
-    }
-    // Cerrar acordeón si ya está registrado
-    if(asistHoy) {
-      const body = document.getElementById('asist-body');
-      const chev = document.getElementById('asist-chevron');
-      if(body) body.style.display = 'none';
-      if(chev) chev.style.transform = '';
-    }
+  const asistHoy = (t.asistencia_fecha === fechaHoy) ? t.asistencia : null;
+  actualizarBadgeAsist(asistHoy || null);
+  const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
+  opts.forEach(o => {
+    const btn = document.getElementById('ab-'+o);
+    if(btn) { btn.classList.remove('sel','asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'); }
   });
+  if(asistHoy) {
+    const btn = document.getElementById('ab-'+asistHoy);
+    if(btn) { btn.classList.add('sel', asistHoy); }
+  }
   // Cerrar acordeón al abrir detalle
   const body = document.getElementById('asist-body');
   const chev = document.getElementById('asist-chevron');
@@ -678,8 +670,9 @@ function actualizarBadgeAsist(tipo) {
 async function registrarAsistencia(tipo) {
   if(!turnoActualId) return;
   const fechaHoy = fechaLocal();
-  // Guardar por fecha para que cada semana sea independiente
-  await db.ref('asistencias/' + turnoActualId + '/' + fechaHoy).set(tipo);
+  // Guardar en el turno con la fecha de hoy
+  await db.ref('turnos/' + turnoActualId + '/asistencia').set(tipo);
+  await db.ref('turnos/' + turnoActualId + '/asistencia_fecha').set(fechaHoy);
   
   // Actualizar botones
   const opts = ['asistio','no-aviso','aviso-tiempo','aviso-hora','feriado'];
