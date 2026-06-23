@@ -707,29 +707,30 @@ async function guardarConfigG1() {
   const ini = document.getElementById('g1-mes-inicio').value;
   const fin = document.getElementById('g1-mes-fin').value;
   if(!ini || !fin) { toast('⚠ Completá los meses de autorización'); return; }
+  const frecEl = document.getElementById('g1-frecuencia');
+  const valorEl = document.getElementById('g1-valor');
   const config = {
     mes_inicio: ini, mes_fin: fin,
-    frecuencia: parseInt(document.getElementById('g1-frecuencia').value),
-    valor: parseFloat(document.getElementById('g1-valor').value) || 0,
+    frecuencia: parseInt(frecEl ? frecEl.value : 1),
+    valor: parseFloat(valorEl ? valorEl.value : 0) || 0,
     os: document.getElementById('g1-os').value,
     notas: document.getElementById('g1-notas').value,
   };
   await db.ref('pacientes/' + pidActual + '/config_g1').set(config);
   await db.ref('pacientes/' + pidActual + '/grupo_cobro').set(1);
-  // Generar meses automáticamente
-  await generarMesesG1(ini, fin, config.valor);
+  // Calcular monto mensual y generar meses
+  const montoMensual = config.valor * config.frecuencia * 4;
+  toast(`Calculando: $${config.valor} × ${config.frecuencia} × 4 = $${montoMensual.toLocaleString('es-AR')}`);
+  await generarMesesG1(ini, fin, config.valor, config.frecuencia);
   toast('✓ Configuración guardada');
   renderG1Meses();
 }
 
-async function generarMesesG1(ini, fin, valor) {
+async function generarMesesG1(ini, fin, valor, frecuencia) {
   const [yIni, mIni] = ini.split('-').map(Number);
   const [yFin, mFin] = fin.split('-').map(Number);
-  // Calcular monto mensual: valor sesión × frecuencia semanal × 4 semanas
-  const _p = pacs[pidActual] || {};
-  const cfg = _p.config_g1 || {};
-  const _frEl = document.getElementById('g1-frecuencia');
-  const frecuencia = parseInt((_frEl ? _frEl.value : null) || cfg.frecuencia || 1);
+  // frecuencia viene como parámetro directo
+  frecuencia = parseInt(frecuencia || 1);
   const montoMensual = valor * frecuencia * 4;
 
   let y = yIni, m = mIni;
@@ -742,11 +743,10 @@ async function generarMesesG1(ini, fin, valor) {
         valor_sesion: valor, valor: montoMensual, cobrado: false, creado: Date.now()
       });
     } else if(!snap.val().cobrado) {
-      if(!snap.val().valor || snap.val().valor === 0) {
-        await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).update({
-          valor_sesion: valor, valor: montoMensual
-        });
-      }
+      // Siempre recalcular el monto mensual en meses no cobrados
+      await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).update({
+        valor_sesion: valor, valor: montoMensual
+      });
     }
     m++;
     if(m > 12) { m = 1; y++; }
