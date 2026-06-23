@@ -807,7 +807,8 @@ window.actualizarPeso = actualizarPeso;
 // ===== VERIFICAR ASISTENCIAS PENDIENTES =====
 function verificarAsistenciasPendientes(turnos) {
   const hoy = new Date();
-  const hoyStr = hoy.toISOString().split('T')[0];
+  // Usar fecha LOCAL (no UTC) para evitar desfase con Argentina GMT-3
+  const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
   const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
   const diaHoy = diasSemana[hoy.getDay()];
   
@@ -886,8 +887,10 @@ function cargarDatosHoy() {
     window.dbOnValue(window.dbRef(window.db, 'asistencias'), snap => {
       const todas = snap.val() || {};
       window._asistHoy = {};
+      const _h = new Date();
+      const _hoyLocal = `${_h.getFullYear()}-${String(_h.getMonth()+1).padStart(2,'0')}-${String(_h.getDate()).padStart(2,'0')}`;
       Object.entries(todas).forEach(([tid, fechas]) => {
-        if(fechas && fechas[hoy]) window._asistHoy[tid] = fechas[hoy];
+        if(fechas && fechas[_hoyLocal]) window._asistHoy[tid] = fechas[_hoyLocal];
       });
       // Recargar turnos para actualizar el aviso naranja
       window.dbGet(window.dbRef(window.db, 'turnos')).then(tSnap => {
