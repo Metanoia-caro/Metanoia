@@ -805,21 +805,29 @@ function actualizarPeso(val) {
 window.actualizarPeso = actualizarPeso;
 
 // ===== VERIFICAR ASISTENCIAS PENDIENTES =====
-function verificarAsistenciasPendientes(turnos) {
+async function verificarAsistenciasPendientes(turnos) {
   const hoy = new Date();
-  // Usar fecha LOCAL (no UTC) para evitar desfase con Argentina GMT-3
   const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
   const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
   const diaHoy = diasSemana[hoy.getDay()];
-  
-  // Filtrar turnos de hoy que ya pasaron (más de 30 min) y no tienen asistencia
+
+  // Leer asistencias de hoy directamente de Firebase
+  let asistHoy = {};
+  try {
+    const snap = await window.dbGet(window.dbRef(window.db, 'asistencias'));
+    const todas = snap.val() || {};
+    Object.entries(todas).forEach(([tid, fechas]) => {
+      if(fechas && fechas[hoyStr]) asistHoy[tid] = fechas[hoyStr];
+    });
+  } catch(e) {}
+
   const pendientes = Object.entries(turnos).filter(([id, t]) => {
     const esHoy = t.dia === diaHoy || t.fecha === hoyStr;
     if(!esHoy) return false;
-    // Verificar en la nueva estructura asistencias/id/fecha
-    // (la asistencia ya no se guarda en t.asistencia para turnos fijos)
-    if(t.asistencia && t.asistencia_fecha === hoyStr) return false; // legacy
-    if(window._asistHoy?.[id]) return false; // nueva estructura
+    // Si ya tiene asistencia registrada hoy, no mostrar
+    if(asistHoy[id]) return false;
+    // Legacy: asistencia guardada directamente en el turno
+    if(t.asistencia && t.asistencia_fecha === hoyStr) return false;
     // Verificar si ya pasó la hora del turno + 30 min
     if(t.hora) {
       const [h, m] = t.hora.split(':').map(Number);
