@@ -725,16 +725,20 @@ async function guardarConfigG1() {
 async function generarMesesG1(ini, fin, valor) {
   const [yIni, mIni] = ini.split('-').map(Number);
   const [yFin, mFin] = fin.split('-').map(Number);
-  const meses = {};
   let y = yIni, m = mIni;
   while(y < yFin || (y === yFin && m <= mFin)) {
     const key = `${y}-${String(m).padStart(2,'0')}`;
-    // Solo agregar si no existe ya (para no sobreescribir cobros ya registrados)
     const snap = await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).once('value');
     if(!snap.exists()) {
+      // Mes nuevo: crear con el valor
       await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).set({
         valor, cobrado: false, creado: Date.now()
       });
+    } else if(!snap.val().cobrado) {
+      // Mes existente no cobrado: actualizar el valor si estaba en 0
+      if(!snap.val().valor || snap.val().valor === 0) {
+        await db.ref(`pacientes/${pidActual}/meses_g1/${key}/valor`).set(valor);
+      }
     }
     m++;
     if(m > 12) { m = 1; y++; }
