@@ -725,6 +725,11 @@ async function guardarConfigG1() {
 async function generarMesesG1(ini, fin, valor) {
   const [yIni, mIni] = ini.split('-').map(Number);
   const [yFin, mFin] = fin.split('-').map(Number);
+  // Calcular monto mensual: valor sesión × frecuencia semanal × 4 semanas
+  const cfg = pacs[pidActual]?.config_g1 || {};
+  const frecuencia = parseInt(document.getElementById('g1-frecuencia')?.value || cfg.frecuencia || 1);
+  const montoMensual = valor * frecuencia * 4;
+
   let y = yIni, m = mIni;
   while(y < yFin || (y === yFin && m <= mFin)) {
     const key = `${y}-${String(m).padStart(2,'0')}`;
@@ -732,12 +737,13 @@ async function generarMesesG1(ini, fin, valor) {
     if(!snap.exists()) {
       // Mes nuevo: crear con el valor
       await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).set({
-        valor, cobrado: false, creado: Date.now()
+        valor_sesion: valor, valor: montoMensual, cobrado: false, creado: Date.now()
       });
     } else if(!snap.val().cobrado) {
-      // Mes existente no cobrado: actualizar el valor si estaba en 0
       if(!snap.val().valor || snap.val().valor === 0) {
-        await db.ref(`pacientes/${pidActual}/meses_g1/${key}/valor`).set(valor);
+        await db.ref(`pacientes/${pidActual}/meses_g1/${key}`).update({
+          valor_sesion: valor, valor: montoMensual
+        });
       }
     }
     m++;
@@ -759,6 +765,8 @@ function renderG1Meses() {
 function _renderG1MesesData(meses, p, el) {
   const MESES_N = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const items = Object.entries(meses).sort((a,b) => a[0].localeCompare(b[0]));
+  const cfg = p.config_g1 || {};
+  const frecuencia = parseInt(cfg.frecuencia || 1);
   if(!items.length) { el.innerHTML = '<div class="empty">Sin meses generados. Completá la autorización arriba.</div>'; return; }
   
   const colect = p.colectivando;
@@ -811,9 +819,13 @@ async function actualizarValorDesde() {
   
   // Actualizar solo los meses >= desde que no estén cobrados
   const updates = {};
-  Object.entries(meses).forEach(([key, m]) => {
-    if(key >= desde && !m.cobrado) {
-      updates[`pacientes/${pidActual}/meses_g1/${key}/valor`] = nuevoValor;
+  const frecuenciaActual = parseInt(document.getElementById('g1-frecuencia')?.value || 1);
+  const nuevoMontoMensual = nuevoValor * frecuenciaActual * 4;
+  
+  Object.entries(meses).forEach(([key, mes]) => {
+    if(key >= desde && !mes.cobrado) {
+      updates[`pacientes/${pidActual}/meses_g1/${key}/valor_sesion`] = nuevoValor;
+      updates[`pacientes/${pidActual}/meses_g1/${key}/valor`] = nuevoMontoMensual;
     }
   });
   
