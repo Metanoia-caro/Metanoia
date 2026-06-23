@@ -353,9 +353,11 @@ function renderMes() {
       const mesData = p.meses_g1?.[mesKey];
       monto = mesData ? parseFloat(mesData.valor || 0) : 0;
     } else if(grupo === 2) {
-      // Grupo 2: suma de atenciones activas
-      const atenciones = p.atenciones || {};
-      monto = Object.values(atenciones).filter(a => !a.finalizada).reduce((s,a) => s + parseFloat(a.valor||0), 0);
+      // Grupo 2: sesiones registradas este mes via asistencia
+      const sesionesG2 = (cobrosG2[mesKey] && cobrosG2[mesKey][id] && cobrosG2[mesKey][id].sesiones) || {};
+      monto = Object.values(sesionesG2).reduce((s, ses) => s + parseFloat(ses.valor||0), 0);
+      const sesionesCobradas = Object.values(sesionesG2).filter(s => s.cobrado).length;
+      const sesionesTotal = Object.values(sesionesG2).length;
     } else {
       const valor = parseFloat(p.valor_sesion || 0);
       const hs = parseFloat(p.hs_mes || 0);
@@ -379,7 +381,7 @@ function renderMes() {
         <div class="pc-av" style="background:${color}">${ini}</div>
         <div class="pc-info">
           <div class="pc-nombre">${p.nombre || '—'}${p.colectivando ? ' 🤝' : ''} ${grupo===1?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#e3f2fd;color:#1565c0">G1</span>':grupo===2?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#f3e5f5;color:#6a1b9a">G2</span>':''}</div>
-          <div class="pc-hs">${grupo===1?'Discapacidad · autorización':grupo===2?'Particular/OS':'Sin grupo configurado'}</div>
+          <div class="pc-hs">${grupo===1?'Discapacidad · autorización':grupo===2?`Particular/OS · ${Object.values((cobrosG2[mesKey]||{})[id]?.sesiones||{}).length} sesiones`:''}</div>
         </div>
         <div class="pc-monto" style="color:${pagado ? 'var(--trabajo-dark)' : 'var(--texto2)'}">$${monto.toLocaleString('es-AR')}</div>
         <div class="pc-estado ${estCls}" onclick="event.stopPropagation();togglePago('${mesKey}','${id}',${pagado})">${estTxt}</div>
@@ -419,12 +421,29 @@ function toggleDet(detId, arrId) {
   if (arr) arr.classList.toggle('open');
 }
 
+async function toggleSesionG2(mesKey, pacId, fecha, actual) {
+  await db.ref(`cobros_g2/${mesKey}/${pacId}/sesiones/${fecha}/cobrado`).set(!actual);
+  renderMes();
+  toast(!actual ? '✓ Sesión cobrada' : 'Sesión marcada como pendiente');
+}
+
 async function togglePago(mesKey, pacId, actual) {
   const p = pacientes[pacId] || {};
   // Grupo 1: marcar en meses_g1
   if(p.grupo_cobro === 1) {
     await db.ref(`pacientes/${pacId}/meses_g1/${mesKey}/cobrado`).set(!actual);
     if(!actual) await db.ref(`pacientes/${pacId}/meses_g1/${mesKey}/fecha_cobro`).set(new Date().toLocaleDateString('en-CA'));
+    renderMes();
+    return;
+  }
+  // Grupo 2: marcar todas las sesiones del mes como cobradas
+  if(p.grupo_cobro === 2) {
+    const sesiones = (cobrosG2[mesKey] && cobrosG2[mesKey][pacId] && cobrosG2[mesKey][pacId].sesiones) || {};
+    const updates = {};
+    Object.keys(sesiones).forEach(fecha => {
+      updates[`cobros_g2/${mesKey}/${pacId}/sesiones/${fecha}/cobrado`] = !actual;
+    });
+    if(Object.keys(updates).length) await db.ref().update(updates);
     renderMes();
     return;
   }
